@@ -1,2 +1,0 @@
-/Users/sparshg/CelestrixBlockchain/cmake-build-debug/CMakeFiles/edit_cache.dir
-/Users/sparshg/CelestrixBlockchain/cmake-build-debug/CMakeFiles/rebuild_cache.dir

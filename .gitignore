@@ -33,3 +33,7 @@
 
 # Pycharm
 .idea
+
+# Build
+cmake-build-debug
+build
