@@ -1,15 +1,15 @@
 #include "Blockchain.h"
 
-Blockchain::Blockchain(int difficulty) : difficulty(difficulty) {
+#include <iostream>
 
-}
+Blockchain::Blockchain(int difficulty) : difficulty(difficulty) {}
 
-void Blockchain::addBlock(const Block &block) {
-    chain.push_back(block);
-}
+void Blockchain::addBlock(const Block &block) {}
 
 Block Blockchain::getBlock() const {}
 
 bool Blockchain::isChainValid() const {}
 
 void Blockchain::mineTransactions() const {}
+
+void Blockchain::printBlockchain() const {}

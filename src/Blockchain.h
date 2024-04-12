@@ -5,16 +5,16 @@
 
 class Blockchain {
 private:
-    std::vector<Block> chain;
-    int difficulty;
+  std::vector<Block> chain;
+  int difficulty;
 
 public:
-    Blockchain(int difficulty);
-    void addBlock(const Block& block);
-    Block getBlock() const;
-    bool isChainValid() const;
-    void mineTransactions() const;
+  Blockchain(int difficulty);
+  void addBlock(const Block &block);
+  Block getBlock() const;
+  bool isChainValid() const;
+  void mineTransactions() const;
+  void printBlockchain() const;
 };
 
-
-#endif //CELESTRIXBLOCKCHAIN_BLOCKCHAIN_H
+#endif // CELESTRIXBLOCKCHAIN_BLOCKCHAIN_H
