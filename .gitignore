@@ -31,9 +31,13 @@
 *.out
 *.app
 
-# Pycharm
+# IDEs
 .idea
+.vscode
 
 # Build
 cmake-build-debug
 build
+
+# mac
+.DS_Store

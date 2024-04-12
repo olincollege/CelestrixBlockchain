@@ -8,3 +8,12 @@
 # or similar. The PRIVATE/INTERFACE/PUBLIC keyword will depend on whether the
 # library is used only in function bodies (PRIVATE), only in function
 # signatures/types (INTERFACE), or both (PUBLIC).
+
+add_executable(main main.cpp)
+
+add_library(BlockchainLib
+        Block.cpp Block.h
+        Transaction.cpp Transaction.h
+        Blockchain.cpp Blockchain.h)
+
+target_link_libraries(main PRIVATE BlockchainLib)
