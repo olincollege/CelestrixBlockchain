@@ -48,7 +48,7 @@ std::vector<uint32_t> sha256::computeMessageSchedule(const std::vector<uint8_t> 
     return messageSchedule;
 }
 
-std::string sha256::hash(std::string &message) {
+std::string sha256::hash(std::basic_string<char, std::char_traits<char>, std::allocator<char>> message) {
     std::vector<uint8_t> paddedMessage;
     // Pad the message
     paddedMessage.push_back(0x80);
