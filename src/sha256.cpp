@@ -43,7 +43,7 @@ std::vector<uint32_t> sha256::computeMessageSchedule(const std::vector<uint8_t> 
         messageSchedule[i] = (block[i * 4] << 24) | (block[i * 4 + 1] << 16) | (block[i * 4 + 2] << 8) | block[i * 4 + 3];
     }
     for (int i = 16; i < 64; ++i) {
-        messageSchedule[i] = sigma1(messageSchedule[i - 2]) + messageSchedule[i - 7];
+        messageSchedule[i] = sigma1(messageSchedule[i - 2]) + messageSchedule[i - 7] + sigma0(messageSchedule[i - 15]) + messageSchedule[i - 16];
     }
     return messageSchedule;
 }
