@@ -43,12 +43,12 @@ std::vector<uint32_t> sha256::computeMessageSchedule(const std::vector<uint8_t> 
         messageSchedule[i] = (block[i * 4] << 24) | (block[i * 4 + 1] << 16) | (block[i * 4 + 2] << 8) | block[i * 4 + 3];
     }
     for (int i = 16; i < 64; ++i) {
-        messageSchedule[i] = sigma1(messageSchedule[i - 2]) + messageSchedule[i - 7];
+        messageSchedule[i] = sigma1(messageSchedule[i - 2]) + messageSchedule[i - 7] + sigma0(messageSchedule[i - 15]) + messageSchedule[i - 16];
     }
     return messageSchedule;
 }
 
-std::string sha256::hash(std::string &message) {
+std::string sha256::hash(std::basic_string<char, std::char_traits<char>, std::allocator<char>> message) {
     std::vector<uint8_t> paddedMessage;
     // Pad the message
     paddedMessage.push_back(0x80);
