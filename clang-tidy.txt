@@ -1,7 +1,7 @@
 ---
 Checks: >
   *, -llvmlibc-restrict-system-libc-headers, -llvm-header-guard, -altera*,
-  -cert-*-cpp,
+  -cert-*-cpp, -llvmlibc*, -modernize-use-trailing-return-type
 HeaderFilterRegex: "."
 FormatStyle: google
 CheckOptions:
