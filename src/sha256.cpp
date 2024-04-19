@@ -49,16 +49,20 @@ std::vector<uint32_t> sha256::computeMessageSchedule(const std::vector<uint8_t> 
     return messageSchedule;
 }
 
-std::vector<std::byte> sha256::hash(const std::string& message) {
-    std::vector<uint8_t> paddedMessage;
+std::vector<std::byte> sha256::hash(const std::vector<std::byte>& message) {
+    // Convert message to vector of uint8_t
+    std::vector<uint8_t> messageBytes(message.size());
+    for (size_t i = 0; i < message.size(); ++i) {
+        messageBytes[i] = static_cast<uint8_t>(message[i]);
+    }
+
     // Pad the message
+    std::vector<uint8_t> paddedMessage;
     paddedMessage.push_back(0x80);
-    // Append zeros such that message length is 448 bits modulo 512
     while ((paddedMessage.size() * 8) % 512 != 448) {
         paddedMessage.push_back(0x00);
     }
-    // Append original message bit-length
-    uint64_t messageLength = message.size() * 8;
+    uint64_t messageLength = messageBytes.size() * 8;
     for (int i = 0; i < 8; ++i) {
         paddedMessage.push_back((messageLength >> (56 -i * 8)) & 0xFF);
     }
@@ -70,7 +74,6 @@ std::vector<std::byte> sha256::hash(const std::string& message) {
         std::vector<uint8_t> block(paddedMessage.begin() + static_cast<long>(i), paddedMessage.begin() + static_cast<long>(i) + 64);
         std::vector<uint32_t> messageSchedule = computeMessageSchedule(block);
 
-        // Initialize working variables to current hash value
         uint32_t a = hashValues[0];
         uint32_t b = hashValues[1];
         uint32_t c = hashValues[2];
@@ -80,12 +83,11 @@ std::vector<std::byte> sha256::hash(const std::string& message) {
         uint32_t g = hashValues[6];
         uint32_t h = hashValues[7];
 
-        // Compression function main loop
         for (int j = 0; j < 64; ++j) {
             uint32_t ch = (e & f) ^ ((~e) & g);
             uint32_t temp1 = h + Sigma1(e) + ch + K[j] + messageSchedule[static_cast<unsigned long>(j)];
             uint32_t maj = (a & b) ^ (a & c) ^ (b & c);
-            uint32_t temp2 = Sigma0(e) + maj;
+            uint32_t temp2 = Sigma0(a) + maj;
 
             h = g;
             g = f;
@@ -97,7 +99,6 @@ std::vector<std::byte> sha256::hash(const std::string& message) {
             a = temp1 + temp2;
         }
 
-        // Add the compressed chunk to the current hash value
         hashValues[0] += a;
         hashValues[1] += b;
         hashValues[2] += c;
@@ -108,9 +109,9 @@ std::vector<std::byte> sha256::hash(const std::string& message) {
         hashValues[7] += h;
     }
 
-    // Construct the final hash vector
+    // Convert hash values to bytes
     std::vector<std::byte> hashBytes;
-    for (unsigned int hashValue : hashValues) {
+    for (uint32_t hashValue : hashValues) {
         for (int j = 0; j < 4; ++j) {
             hashBytes.push_back(static_cast<std::byte>((hashValue >> (24 - j * 8)) & 0xFF));
         }
