@@ -10,7 +10,7 @@ private:
   mutable std::vector<Transaction> pendingTransactions;
 
 public:
-  Blockchain(int difficulty);
+  explicit Blockchain(int difficulty);
   void addBlock(const Block &block);
   Block getBlock() const;
   bool isChainValid() const;

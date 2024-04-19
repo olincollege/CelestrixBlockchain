@@ -39,16 +39,17 @@ uint32_t sha256::Sigma1(uint32_t value) {
 
 std::vector<uint32_t> sha256::computeMessageSchedule(const std::vector<uint8_t> &block) {
     std::vector<uint32_t> messageSchedule(64);
-    for (int i = 0; i < 16; ++i) {
-        messageSchedule[i] = (block[i * 4] << 24) | (block[i * 4 + 1] << 16) | (block[i * 4 + 2] << 8) | block[i * 4 + 3];
+    for (unsigned long i = 0; i < 16; ++i) {
+        messageSchedule[i] = static_cast<unsigned int>((block[i * 4] << 24) | (block[i * 4 + 1] << 16) |
+                                                       (block[i * 4 + 2] << 8) | block[i * 4 + 3]);
     }
-    for (int i = 16; i < 64; ++i) {
+    for (unsigned long i = 16; i < 64; ++i) {
         messageSchedule[i] = sigma1(messageSchedule[i - 2]) + messageSchedule[i - 7] + sigma0(messageSchedule[i - 15]) + messageSchedule[i - 16];
     }
     return messageSchedule;
 }
 
-std::string sha256::hash(std::basic_string<char, std::char_traits<char>, std::allocator<char>> message) {
+std::vector<std::byte> sha256::hash(const std::string& message) {
     std::vector<uint8_t> paddedMessage;
     // Pad the message
     paddedMessage.push_back(0x80);
@@ -66,7 +67,7 @@ std::string sha256::hash(std::basic_string<char, std::char_traits<char>, std::al
     std::vector<uint32_t> hashValues(initialHashValues, initialHashValues + 8);
 
     for (size_t i = 0; i < paddedMessage.size(); i += 64) {
-        std::vector<uint8_t> block(paddedMessage.begin() + i, paddedMessage.begin() + i + 64);
+        std::vector<uint8_t> block(paddedMessage.begin() + static_cast<long>(i), paddedMessage.begin() + static_cast<long>(i) + 64);
         std::vector<uint32_t> messageSchedule = computeMessageSchedule(block);
 
         // Initialize working variables to current hash value
@@ -82,7 +83,7 @@ std::string sha256::hash(std::basic_string<char, std::char_traits<char>, std::al
         // Compression function main loop
         for (int j = 0; j < 64; ++j) {
             uint32_t ch = (e & f) ^ ((~e) & g);
-            uint32_t temp1 = h + Sigma1(e) + ch + K[j] + messageSchedule[j];
+            uint32_t temp1 = h + Sigma1(e) + ch + K[j] + messageSchedule[static_cast<unsigned long>(j)];
             uint32_t maj = (a & b) ^ (a & c) ^ (b & c);
             uint32_t temp2 = Sigma0(e) + maj;
 
@@ -107,15 +108,15 @@ std::string sha256::hash(std::basic_string<char, std::char_traits<char>, std::al
         hashValues[7] += h;
     }
 
-    // Construct the final hash string
-    std::string hashString;
-    for (size_t i = 0; i < hashValues.size(); ++i) {
+    // Construct the final hash vector
+    std::vector<std::byte> hashBytes;
+    for (unsigned int hashValue : hashValues) {
         for (int j = 0; j < 4; ++j) {
-            hashString += ((hashValues[i] >> (24 - j * 8)) & 0xFF);
+            hashBytes.push_back(static_cast<std::byte>((hashValue >> (24 - j * 8)) & 0xFF));
         }
     }
 
-    return hashString;
+    return hashBytes;
 }
 
 

@@ -2,7 +2,8 @@
 #include <iostream>
 
 Blockchain::Blockchain(int difficulty) : difficulty(difficulty) {
-  Block genesisBlock("0", std::time(nullptr), std::vector<Transaction>());
+    // create a genesis block
+  Block genesisBlock(std::vector<std::byte>(), std::time(nullptr), std::vector<Transaction>());
   genesisBlock.mineBlock(difficulty);
   chain.push_back(genesisBlock);
 }
@@ -30,16 +31,23 @@ bool Blockchain::isChainValid() const {
 void Blockchain::mineTransactions() const {}
 
 void Blockchain::printBlockchain() const {
-  for (const auto &block : chain) {
-    std::cout << "Block Hash: " << block.getBlockHash() << std::endl;
-    std::cout << "Previous Hash: " << block.getPreviousHash() << std::endl;
-    std::cout << "Timestamp: " << block.getTimestamp() << std::endl;
-    std::cout << "Transactions: " << std::endl;
-    for (const Transaction &transaction : block.getTransactions()) {
-      std::cout << "Type: " << transaction.getType() << std::endl;
-      std::cout << "Length: " << transaction.getLength() << std::endl;
+    for (const auto &block : chain) {
+        std::cout << "Block Hash: ";
+        for (const auto &byte : block.getBlockHash()) {
+            std::cout << std::hex << static_cast<int>(byte);
+        }
+        std::cout << std::endl;
+        std::cout << "Previous Hash: ";
+        for (const auto &byte : block.getPreviousHash()) {
+            std::cout << std::hex << static_cast<int>(byte);
+        }
+        std::cout << std::endl;
+        std::cout << "Timestamp: " << block.getTimestamp() << std::endl;
+        std::cout << "Transactions: " << std::endl;
+        for (const Transaction &transaction : block.getTransactions()) {
+            std::cout << "Type: " << transaction.getType() << std::endl;
+            std::cout << "Length: " << transaction.getLength() << std::endl;
+        }
+        std::cout << std::endl;
     }
-
-    std::cout << std::endl;
-  }
 }

@@ -18,7 +18,7 @@ private:
     static std::vector<uint32_t> computeMessageSchedule(const std::vector<uint8_t>& block);
 
 public:
-    static std::string hash(std::basic_string<char, std::char_traits<char>, std::allocator<char>> message);
+    static std::vector<std::byte> hash(const std::string& message);
 };
 
 
