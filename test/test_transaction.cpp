@@ -3,13 +3,40 @@
 
 // Test to verify encoding and decoding of transactions
 Test(transaction, encode_decode) {
-  std::vector<uint8_t> data = {0x01, 0x02, 0x03};
+  std::vector<std::byte> data(
+      {std::byte{0x01}, std::byte{0x02}, std::byte{0x03}});
   Transaction tx(1, data);
 
-  std::vector<uint8_t> encoded = tx.encodeData();
+  std::vector<std::byte> encoded = tx.encodeData();
   Transaction decodedTx = Transaction::decode(encoded);
 
   cr_assert_eq(decodedTx.getType(), tx.getType(), "Type mismatch");
   cr_assert_eq(decodedTx.getLength(), tx.getLength(), "Length mismatch");
   cr_assert_eq(decodedTx.getData(), tx.getData(), "Data mismatch");
+}
+
+// Test basic class construction
+Test(Transaction, Constructor) {
+  std::vector<std::byte> data(
+      {std::byte{0x01}, std::byte{0x02}, std::byte{0x03}});
+  Transaction transaction(1, data);
+  cr_assert_eq(transaction.getType(), 1);
+  cr_assert_eq(transaction.getLength(), 3);
+  cr_assert_eq(transaction.getData(), data);
+}
+
+// Test with empty data
+Test(Transaction, NoData) {
+  std::vector<std::byte> emptyData({});
+  Transaction emptyTransaction(1, emptyData);
+  cr_assert_eq(emptyTransaction.getLength(), 0);
+  cr_assert_eq(emptyTransaction.getData(), emptyData);
+}
+
+// Test with data with one entry
+Test(Transaction, OneData) {
+  std::vector<std::byte> oneData({std::byte{0x01}});
+  Transaction oneTransaction(1, oneData);
+  cr_assert_eq(oneTransaction.getLength(), 1);
+  cr_assert_eq(oneTransaction.getData(), oneData);
 }
