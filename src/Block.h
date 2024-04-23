@@ -8,6 +8,10 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <utility>
+#include <openssl/evp.h>
+#include <openssl/pem.h>
+#include <openssl/rsa.h>
 
 class Block {
 private:
@@ -35,8 +39,6 @@ public:
   void mineBlock(int difficulty);
   [[nodiscard]] int getIndex() const;
   [[nodiscard]] int getBlockSize() const;
-  [[nodiscard]] bool validateBlock() const;
-  [[nodiscard]] std::vector<std::byte> getBlockSignature() const;
   [[nodiscard]] std::vector<std::byte> serialize() const;
   static Block deserialize(const std::vector<std::byte> &serializedData);
   [[nodiscard]] std::vector<std::byte> calculateMerkleRoot() const;
@@ -44,6 +46,9 @@ public:
   [[nodiscard]] int getNonce() const;
   void setDifficulty(int difficulty);
   void addTransaction(const Transaction &transaction);
+  bool signBlock(const EVP_PKEY* privateKey);
+  bool verifyBlockSignature(const EVP_PKEY* publicKey) const;
+  std::vector<std::byte> getBlockSignature() const;
 };
 
 #endif // CELESTRIXBLOCKCHAIN_BLOCK_H
