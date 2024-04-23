@@ -122,7 +122,6 @@ std::vector<std::byte> sha256::hash(const std::vector<std::byte>& message) {
             hashBytes.push_back(static_cast<std::byte>((hashValue >> (24 - j * 8)) & 0xFF));
         }
     }
-  }
 
   return hashBytes;
 }
