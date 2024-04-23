@@ -12,9 +12,8 @@ private:
 public:
   explicit Blockchain(int difficulty);
   void addBlock(const Block &block);
-  Block getBlock() const;
+  Block getBlock(int index) const;
   bool isChainValid() const;
-  void mineTransactions() const;
   void printBlockchain() const;
 };
 

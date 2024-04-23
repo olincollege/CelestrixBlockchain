@@ -12,6 +12,7 @@
 class Block {
 private:
   // Block header
+  int index;
   int version;
   std::vector<std::byte> previousHash;
   std::vector<std::byte> blockHash;
@@ -24,23 +25,23 @@ private:
   int difficultyTarget{};
 
 public:
-  Block(std::vector<std::byte> previousHash, std::time_t timestamp,
-        std::vector<Transaction> transactions);
-  std::vector<std::byte> getBlockHash() const;
-  std::vector<std::byte> calculateBlockHash() const;
-  std::vector<std::byte> getPreviousHash() const;
-  std::vector<Transaction> getTransactions() const;
-  std::time_t getTimestamp() const;
+  Block(int index, std::vector<std::byte> previousHash,
+        std::time_t timestamp, std::vector<Transaction> transactions);
+  [[nodiscard]] std::vector<std::byte> getBlockHash() const;
+  [[nodiscard]] std::vector<std::byte> calculateBlockHash() const;
+  [[nodiscard]] std::vector<std::byte> getPreviousHash() const;
+  [[nodiscard]] std::vector<Transaction> getTransactions() const;
+  static std::time_t getTimestamp() ;
   void mineBlock(int difficulty);
-  int getBlockHeight() const;
-  int getBlockSize() const;
-  bool validateBlock() const;
-  std::vector<std::byte> getBlockSignature() const;
-  std::vector<std::byte> serialize() const;
+  [[nodiscard]] int getIndex() const;
+  [[nodiscard]] int getBlockSize() const;
+  [[nodiscard]] bool validateBlock() const;
+  [[nodiscard]] std::vector<std::byte> getBlockSignature() const;
+  [[nodiscard]] std::vector<std::byte> serialize() const;
   static Block deserialize(const std::vector<std::byte> &serializedData);
-  std::vector<std::byte> calculateMerkleRoot() const;
-  std::vector<std::byte> getMerkleRoot() const;
-  int getNonce() const;
+  [[nodiscard]] std::vector<std::byte> calculateMerkleRoot() const;
+  [[nodiscard]] std::vector<std::byte> getMerkleRoot() const;
+  [[nodiscard]] int getNonce() const;
   void setDifficulty(int difficulty);
   void addTransaction(const Transaction &transaction);
 };

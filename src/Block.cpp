@@ -3,9 +3,9 @@
 #include "sha256.h"
 #include <utility>
 
-Block::Block(std::vector<std::byte> previousHash, std::time_t timestamp,
-             std::vector<Transaction> transactions)
-    : previousHash(std::move(previousHash)), timestamp(timestamp),
+Block::Block(int index, std::vector<std::byte> previousHash,
+             std::time_t timestamp, std::vector<Transaction> transactions)
+    : index(index), previousHash(std::move(previousHash)), timestamp(timestamp),
       transactions(std::move(transactions)) {
   version = 1;
   nonce = 0;
@@ -13,12 +13,13 @@ Block::Block(std::vector<std::byte> previousHash, std::time_t timestamp,
   blockHash = calculateBlockHash();
 }
 
-std::time_t Block::getTimestamp() const { return std::time(nullptr); }
+std::time_t Block::getTimestamp() { return std::time(nullptr); }
 
 std::vector<std::byte> Block::getBlockHash() const { return blockHash; }
 
 std::vector<std::byte> Block::calculateBlockHash() const {
   std::stringstream ss;
+  ss << index;
   ss << version;
   for (const auto &byte : previousHash) {
     ss << static_cast<int>(byte);
@@ -66,24 +67,46 @@ std::vector<std::byte> Block::getPreviousHash() const { return previousHash; }
 
 std::vector<Transaction> Block::getTransactions() const { return transactions; }
 
-int Block::getBlockHeight() const { return 0; }
+int Block::getIndex() const { return index; }
 
-bool Block::validateBlock() const { return false; }
+bool Block::validateBlock() const {
+    // TODO: not implemented yet
+    return false;
+}
 
-int Block::getBlockSize() const { return 0; }
+int Block::getBlockSize() const {
+    u_long size = sizeof(index) + sizeof(version) + sizeof(timestamp) + sizeof(nonce) + sizeof(difficultyTarget);
+    size += previousHash.size() * sizeof(std::byte);
+    size += blockHash.size() * sizeof(std::byte);
+    size += merkleRoot.size() * sizeof(std::byte);
+    size += blockSignature.size() * sizeof(std::byte);
+    for (const auto &transaction : transactions) {
+        size += sizeof(int); // Size of type
+        size += sizeof(int); // Size of length
+        size += transaction.getData().size() * sizeof(std::byte); // Size of data
+    }
+    return (int)size;
+}
 
 std::vector<std::byte> Block::getBlockSignature() const {
   return blockSignature;
 }
 
-std::vector<std::byte> Block::serialize() const { return {}; }
+std::vector<std::byte> Block::serialize() const {
+    // TODO: not implemented yet
+    return {};
+}
 
-Block Block::deserialize(const std::vector<std::byte> &serializedData) {}
+Block Block::deserialize(const std::vector<std::byte> &serializedData) {
+    // TODO: not implemented yet
+    return {0, {}, 0, {}};
+}
 
 std::vector<std::byte> Block::calculateMerkleRoot() const {
     // extract transaction hashes
     std::vector<std::vector<std::byte>> transactionHashes;
-    for (const auto &transaction : transactions) {
+    transactionHashes.reserve(transactions.size());
+for (const auto &transaction : transactions) {
         transactionHashes.push_back(sha256::hash(transaction.encodeData()));
     }
 
