@@ -38,13 +38,13 @@ std::vector<std::byte> Block::calculateBlockHash() const {
   }
   ss << difficultyTarget;
 
-    std::string data = ss.str();
-    std::vector<std::byte> dataBytes;
-    for (char c : data) {
-        dataBytes.push_back(static_cast<std::byte>(c));
-    }
+  std::string data = ss.str();
+  std::vector<std::byte> dataBytes;
+  for (char c : data) {
+    dataBytes.push_back(static_cast<std::byte>(c));
+  }
 
-    return sha256::hash(dataBytes);
+  return sha256::hash(dataBytes);
 }
 
 void Block::mineBlock(int difficulty) {
@@ -69,88 +69,96 @@ std::vector<Transaction> Block::getTransactions() const { return transactions; }
 int Block::getIndex() const { return index; }
 
 int Block::getBlockSize() const {
-    u_long size = sizeof(index) + sizeof(version) + sizeof(timestamp) + sizeof(nonce) + sizeof(difficultyTarget);
-    size += previousHash.size() * sizeof(std::byte);
-    size += blockHash.size() * sizeof(std::byte);
-    size += merkleRoot.size() * sizeof(std::byte);
-    size += blockSignature.size() * sizeof(std::byte);
-    for (const auto &transaction : transactions) {
-        size += sizeof(int); // Size of type
-        size += sizeof(int); // Size of length
-        size += transaction.getData().size() * sizeof(std::byte); // Size of data
-    }
-    return (int)size;
+  u_long size = sizeof(index) + sizeof(version) + sizeof(timestamp) +
+                sizeof(nonce) + sizeof(difficultyTarget);
+  size += previousHash.size() * sizeof(std::byte);
+  size += blockHash.size() * sizeof(std::byte);
+  size += merkleRoot.size() * sizeof(std::byte);
+  size += blockSignature.size() * sizeof(std::byte);
+  for (const auto &transaction : transactions) {
+    size += sizeof(int);                                      // Size of type
+    size += sizeof(int);                                      // Size of length
+    size += transaction.getData().size() * sizeof(std::byte); // Size of data
+  }
+  return (int)size;
 }
 
 bool Block::signBlock(const EVP_PKEY *privateKey) {
-    // message digest context for signing
-    EVP_MD_CTX* mdCtx = EVP_MD_CTX_new();
-    if (!mdCtx) { return false; }
+  // message digest context for signing
+  EVP_MD_CTX *mdCtx = EVP_MD_CTX_new();
+  if (!mdCtx) {
+    return false;
+  }
 
-    // initialize it with SHA256
-    if (EVP_DigestSignInit(mdCtx, nullptr, EVP_sha256(), nullptr, const_cast<EVP_PKEY*>(privateKey)) != 1) {
-        EVP_MD_CTX_free(mdCtx);
-        return false;
-    }
-
-    // calculate the hash of the block
-    std::vector<std::byte> hash = calculateBlockHash();
-
-    // sign the hash
-    if (EVP_DigestSign(mdCtx, nullptr, nullptr, reinterpret_cast<const unsigned char*>(hash.data()), hash.size()) != 1) {
-        EVP_MD_CTX_free(mdCtx);
-        return false;
-    }
-
-    // allocate memory for length of signature
-    size_t lenSignature;
-    if (EVP_DigestSign(mdCtx, nullptr, &lenSignature, nullptr, 0) != 1) {
-        EVP_MD_CTX_free(mdCtx);
-        return false;
-    }
-    blockSignature.resize(lenSignature);
-
-    // sign the hash and store signature
-    if (EVP_DigestSign(
-            mdCtx, reinterpret_cast<unsigned char*>(
-                    blockSignature.data()),
-                    &lenSignature,
-                    reinterpret_cast<const unsigned char*>(hash.data()), hash.size()) != 1) {
-        EVP_MD_CTX_free(mdCtx);
-        return false;
-    }
-
+  // initialize it with SHA256
+  if (EVP_DigestSignInit(mdCtx, nullptr, EVP_sha256(), nullptr,
+                         const_cast<EVP_PKEY *>(privateKey)) != 1) {
     EVP_MD_CTX_free(mdCtx);
-    return true;
+    return false;
+  }
+
+  // calculate the hash of the block
+  std::vector<std::byte> hash = calculateBlockHash();
+
+  // sign the hash
+  if (EVP_DigestSign(mdCtx, nullptr, nullptr,
+                     reinterpret_cast<const unsigned char *>(hash.data()),
+                     hash.size()) != 1) {
+    EVP_MD_CTX_free(mdCtx);
+    return false;
+  }
+
+  // allocate memory for length of signature
+  size_t lenSignature;
+  if (EVP_DigestSign(mdCtx, nullptr, &lenSignature, nullptr, 0) != 1) {
+    EVP_MD_CTX_free(mdCtx);
+    return false;
+  }
+  blockSignature.resize(lenSignature);
+
+  // sign the hash and store signature
+  if (EVP_DigestSign(
+          mdCtx, reinterpret_cast<unsigned char *>(blockSignature.data()),
+          &lenSignature, reinterpret_cast<const unsigned char *>(hash.data()),
+          hash.size()) != 1) {
+    EVP_MD_CTX_free(mdCtx);
+    return false;
+  }
+
+  EVP_MD_CTX_free(mdCtx);
+  return true;
 }
 
 bool Block::verifyBlockSignature(const EVP_PKEY *publicKey) const {
-    // message digest context for signing
-    EVP_MD_CTX* mdCtx = EVP_MD_CTX_new();
-    if (!mdCtx) { return false; }
+  // message digest context for signing
+  EVP_MD_CTX *mdCtx = EVP_MD_CTX_new();
+  if (!mdCtx) {
+    return false;
+  }
 
-    // initialize it with SHA256
-    if (EVP_DigestSignInit(mdCtx, nullptr, EVP_sha256(), nullptr, const_cast<EVP_PKEY*>(publicKey)) != 1) {
-        EVP_MD_CTX_free(mdCtx);
-        return false;
-    }
-
-    // calculate the hash of the block
-    std::vector<std::byte> hash = calculateBlockHash();
-
-    // verify the signature
-    if (EVP_DigestVerify(
-            mdCtx, reinterpret_cast<const unsigned char*>(
-                    blockSignature.data()),
-                    blockSignature.size(),
-                    reinterpret_cast<const unsigned char*>(hash.data()), hash.size()) != 1) {
-        EVP_MD_CTX_free(mdCtx);
-        return false;
-    }
-
+  // initialize it with SHA256
+  if (EVP_DigestSignInit(mdCtx, nullptr, EVP_sha256(), nullptr,
+                         const_cast<EVP_PKEY *>(publicKey)) != 1) {
     EVP_MD_CTX_free(mdCtx);
+    return false;
+  }
 
-    return true;
+  // calculate the hash of the block
+  std::vector<std::byte> hash = calculateBlockHash();
+
+  // verify the signature
+  if (EVP_DigestVerify(
+          mdCtx, reinterpret_cast<const unsigned char *>(blockSignature.data()),
+          blockSignature.size(),
+          reinterpret_cast<const unsigned char *>(hash.data()),
+          hash.size()) != 1) {
+    EVP_MD_CTX_free(mdCtx);
+    return false;
+  }
+
+  EVP_MD_CTX_free(mdCtx);
+
+  return true;
 }
 
 std::vector<std::byte> Block::getBlockSignature() const {
@@ -158,46 +166,47 @@ std::vector<std::byte> Block::getBlockSignature() const {
 }
 
 std::vector<std::byte> Block::serialize() const {
-    // TODO: not implemented yet
-    return {};
+  // TODO: not implemented yet
+  return {};
 }
 
 Block Block::deserialize(const std::vector<std::byte> &serializedData) {
-    // TODO: not implemented yet
-    return {0, {}, 0, {}};
+  // TODO: not implemented yet
+  return {0, {}, 0, {}};
 }
 
 std::vector<std::byte> Block::calculateMerkleRoot() const {
-    // extract transaction hashes
-    std::vector<std::vector<std::byte>> transactionHashes;
-    transactionHashes.reserve(transactions.size());
-for (const auto &transaction : transactions) {
-        transactionHashes.push_back(sha256::hash(transaction.encodeData()));
-    }
+  // extract transaction hashes
+  std::vector<std::vector<std::byte>> transactionHashes;
+  transactionHashes.reserve(transactions.size());
+  for (const auto &transaction : transactions) {
+    transactionHashes.push_back(sha256::hash(transaction.encodeData()));
+  }
 
-    // handle odd number of transactions
-    if (transactionHashes.size() % 2 != 0) {
-        transactionHashes.push_back(transactionHashes.back());
-    }
+  // handle odd number of transactions
+  if (transactionHashes.size() % 2 != 0) {
+    transactionHashes.push_back(transactionHashes.back());
+  }
 
-    // merkle root calculation logic
-    while (transactionHashes.size() > 1) {
-        std::vector<std::vector<std::byte>> nextHashes;
-        for (size_t i = 0; i < transactionHashes.size(); i += 2) {
-            std::vector<std::byte> combinedHashes;
-            combinedHashes.insert(combinedHashes.end(), transactionHashes[i].begin(), transactionHashes[i].end());
-            combinedHashes.insert(combinedHashes.end(), transactionHashes[i + 1].begin(), transactionHashes[i + 1].end());
-            nextHashes.push_back(sha256::hash(combinedHashes));
-        }
-        transactionHashes = nextHashes;
+  // merkle root calculation logic
+  while (transactionHashes.size() > 1) {
+    std::vector<std::vector<std::byte>> nextHashes;
+    for (size_t i = 0; i < transactionHashes.size(); i += 2) {
+      std::vector<std::byte> combinedHashes;
+      combinedHashes.insert(combinedHashes.end(), transactionHashes[i].begin(),
+                            transactionHashes[i].end());
+      combinedHashes.insert(combinedHashes.end(),
+                            transactionHashes[i + 1].begin(),
+                            transactionHashes[i + 1].end());
+      nextHashes.push_back(sha256::hash(combinedHashes));
     }
+    transactionHashes = nextHashes;
+  }
 
-    return transactionHashes[0];
+  return transactionHashes[0];
 }
 
-std::vector<std::byte> Block::getMerkleRoot() const {
-    return merkleRoot;
-}
+std::vector<std::byte> Block::getMerkleRoot() const { return merkleRoot; }
 
 int Block::getNonce() const { return nonce; }
 
