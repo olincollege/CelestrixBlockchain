@@ -1,6 +1,7 @@
 #ifndef CELESTRIXBLOCKCHAIN_TRANSACTION_H
 #define CELESTRIXBLOCKCHAIN_TRANSACTION_H
 
+#include "nlohmann/json.hpp"
 #include <cstdint>
 #include <vector>
 
@@ -12,11 +13,13 @@ private:
 
 public:
   Transaction(int type, const std::vector<std::byte> &data);
-  int getType() const;
-  int getLength() const;
-  const std::vector<std::byte> &getData() const;
-  std::vector<std::byte> encodeData() const;
+  [[nodiscard]] int getType() const;
+  [[nodiscard]] int getLength() const;
+  [[nodiscard]] const std::vector<std::byte> &getData() const;
+  [[nodiscard]] std::vector<std::byte> encodeData() const;
   static Transaction decode(const std::vector<std::byte> &encodedData);
+  std::string serialize() const;
+  static Transaction deserialize(const std::string &serializedData);
 };
 
 #endif // CELESTRIXBLOCKCHAIN_TRANSACTION_H
