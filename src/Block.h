@@ -4,6 +4,7 @@
 #include "Transaction.h"
 #include "nlohmann/json.hpp"
 #include <cstdint>
+#include <random>
 #include <ctime>
 #include <iostream>
 #include <sstream>
@@ -18,7 +19,7 @@ class Block {
 private:
   // Block header
   int index;
-  int version;
+  int version{};
   std::vector<std::byte> previousHash;
   std::vector<std::byte> blockHash;
   std::time_t timestamp;
@@ -26,30 +27,36 @@ private:
   // Proof of Work members
   std::vector<std::byte> merkleRoot;
   std::vector<std::byte> blockSignature;
-  int nonce;
+  int nonce{};
   int difficultyTarget{};
 
 public:
-  Block(int index, std::vector<std::byte> previousHash,
-        std::time_t timestamp, std::vector<Transaction> transactions);
+  Block(int index,
+        int version,
+        std::vector<std::byte> previousHash,
+        std::time_t timestamp,
+        std::vector<Transaction> transactions,
+        int nonce,
+        int difficultyTarget);
   [[nodiscard]] std::vector<std::byte> getBlockHash() const;
-  [[nodiscard]] std::vector<std::byte> calculateBlockHash() const;
   [[nodiscard]] std::vector<std::byte> getPreviousHash() const;
   [[nodiscard]] std::vector<Transaction> getTransactions() const;
+  [[nodiscard]] std::vector<std::byte> getBlockSignature() const;
   static std::time_t getTimestamp() ;
-  void mineBlock(int difficulty);
   [[nodiscard]] int getIndex() const;
+  [[nodiscard]] int getVersion() const;
+  [[nodiscard]] int getDifficulty() const;
   [[nodiscard]] int getBlockSize() const;
-  [[nodiscard]] std::string serialize() const;
-  static Block deserialize(const std::string &serializedData);
-  [[nodiscard]] std::vector<std::byte> calculateMerkleRoot() const;
   [[nodiscard]] std::vector<std::byte> getMerkleRoot() const;
   [[nodiscard]] int getNonce() const;
-  void setDifficulty(int difficulty);
+  [[nodiscard]] std::vector<std::byte> calculateBlockHash() const;
+  [[nodiscard]] std::vector<std::byte> calculateMerkleRoot() const;
+  void mineBlock(int difficulty);
+  [[nodiscard]] std::string serialize() const;
+  static Block deserialize(const std::string &serializedData);
   void addTransaction(const Transaction &transaction);
   bool signBlock(const EVP_PKEY* privateKey);
   bool verifyBlockSignature(const EVP_PKEY* publicKey) const;
-  [[nodiscard]] std::vector<std::byte> getBlockSignature() const;
 };
 
 #endif // CELESTRIXBLOCKCHAIN_BLOCK_H

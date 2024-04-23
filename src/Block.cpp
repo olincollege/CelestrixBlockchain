@@ -2,14 +2,28 @@
 
 #include "sha256.h"
 
-Block::Block(int index, std::vector<std::byte> previousHash,
-             std::time_t timestamp, std::vector<Transaction> transactions)
-    : index(index), previousHash(std::move(previousHash)), timestamp(timestamp),
-      transactions(std::move(transactions)) {
-  version = 1;
-  nonce = 0;
-  merkleRoot = calculateMerkleRoot();
-  blockHash = calculateBlockHash();
+Block::Block(int index,
+             int version,
+             std::vector<std::byte> previousHash,
+             std::time_t timestamp,
+             std::vector<Transaction> transactions,
+             int nonce,
+             int difficultyTarget) :
+             index(index),
+             version(version),
+             previousHash(std::move(previousHash)),
+             timestamp(timestamp),
+             transactions(std::move(transactions)),
+             nonce(nonce),
+             difficultyTarget(difficultyTarget)
+             {
+    merkleRoot = calculateMerkleRoot();
+    blockHash = calculateBlockHash();
+    // Generate random nonce
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<int> dist(0, INT_MAX);
+    nonce = dist(gen);
 }
 
 std::time_t Block::getTimestamp() { return std::time(nullptr); }
@@ -173,7 +187,7 @@ std::string Block::serialize() const {
     // Serialize previous hash
     std::vector<int> serializedPreviousHash;
     serializedPreviousHash.reserve(previousHash.size());
-for (const auto& byte : previousHash) {
+    for (const auto& byte : previousHash) {
         serializedPreviousHash.push_back(static_cast<int>(byte));
     }
     jsonObj["previous_hash"] = serializedPreviousHash;
@@ -183,7 +197,7 @@ for (const auto& byte : previousHash) {
     // Serialize transactions
     std::vector<std::string> serializedTransactions;
     serializedTransactions.reserve(transactions.size());
-for (const auto& transaction : transactions) {
+    for (const auto& transaction : transactions) {
         serializedTransactions.push_back(transaction.serialize());
     }
     jsonObj["transactions"] = serializedTransactions;
@@ -191,7 +205,7 @@ for (const auto& transaction : transactions) {
     // Serialize merkle root
     std::vector<int> serializedMerkleRoot;
     serializedMerkleRoot.reserve(merkleRoot.size());
-for (const auto& byte : merkleRoot) {
+    for (const auto& byte : merkleRoot) {
         serializedMerkleRoot.push_back(static_cast<int>(byte));
     }
     jsonObj["merkle_root"] = serializedMerkleRoot;
@@ -199,7 +213,7 @@ for (const auto& byte : merkleRoot) {
     // Serialize block signature
     std::vector<int> serializedBlockSignature;
     serializedBlockSignature.reserve(blockSignature.size());
-for (const auto& byte : blockSignature) {
+    for (const auto& byte : blockSignature) {
         serializedBlockSignature.push_back(static_cast<int>(byte));
     }
     jsonObj["block_signature"] = serializedBlockSignature;
@@ -245,7 +259,7 @@ Block Block::deserialize(const std::string &serializedData) {
     int nonce = jsonObj["nonce"];
     int difficultyTarget = jsonObj["difficulty_target"];
 
-    return {index, previousHash, timestamp, transactions};
+    return {index, version, previousHash, timestamp, transactions, nonce, difficultyTarget};
 }
 
 std::vector<std::byte> Block::calculateMerkleRoot() const {
@@ -283,8 +297,10 @@ std::vector<std::byte> Block::getMerkleRoot() const { return merkleRoot; }
 
 int Block::getNonce() const { return nonce; }
 
-void Block::setDifficulty(int difficulty) { difficultyTarget = difficulty; }
+int Block::getDifficulty() const { return difficultyTarget; }
 
 void Block::addTransaction(const Transaction &transaction) {
   transactions.push_back(transaction);
 }
+
+int Block::getVersion() const { return version; }

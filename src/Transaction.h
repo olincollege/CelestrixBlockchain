@@ -18,7 +18,7 @@ public:
   [[nodiscard]] const std::vector<std::byte> &getData() const;
   [[nodiscard]] std::vector<std::byte> encodeData() const;
   static Transaction decode(const std::vector<std::byte> &encodedData);
-  std::string serialize() const;
+  [[nodiscard]] std::string serialize() const;
   static Transaction deserialize(const std::string &serializedData);
 };
 

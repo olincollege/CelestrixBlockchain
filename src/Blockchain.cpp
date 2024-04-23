@@ -3,15 +3,26 @@
 
 Blockchain::Blockchain(int difficulty) : difficulty(difficulty) {
   // create a genesis block
-  Block genesisBlock(0, std::vector<std::byte>(),
-          std::time(nullptr), std::vector<Transaction>());
+  Block genesisBlock(0,
+                     1,
+                     std::vector<std::byte>(),
+                     std::time(nullptr),
+                     std::vector<Transaction>(),
+                     1,
+                     difficulty);
   genesisBlock.mineBlock(difficulty);
   chain.push_back(genesisBlock);
 }
 
 void Blockchain::addBlock(const Block &block) {
     int newIndex = chain.empty() ? 0 : chain.back().getIndex() + 1;
-    Block newBlock(newIndex, block.getPreviousHash(), Block::getTimestamp(), block.getTransactions());
+    Block newBlock(newIndex,
+                   block.getVersion(),
+                   block.getPreviousHash(),
+                   Block::getTimestamp(),
+                   block.getTransactions(),
+                   block.getNonce(),
+                   block.getDifficulty());
     newBlock.mineBlock(difficulty);
     chain.push_back(newBlock);
 }
@@ -43,6 +54,7 @@ bool Blockchain::isChainValid() const {
 void Blockchain::printBlockchain() const {
   for (const auto &block : chain) {
       std::cout << "Block Index: " << block.getIndex() << std::endl;
+      std::cout << "Block Version: " << block.getVersion() << std::endl;
     std::cout << "Block Hash: ";
     for (const auto &byte : block.getBlockHash()) {
       std::cout << std::hex << static_cast<int>(byte);
