@@ -16,7 +16,7 @@ Test(transaction, encode_decode) {
 }
 
 // Test basic class construction
-Test(Transaction, Constructor) {
+Test(transaction, constructor) {
   std::vector<std::byte> data(
       {std::byte{0x01}, std::byte{0x02}, std::byte{0x03}});
   Transaction transaction(1, data);
@@ -26,7 +26,7 @@ Test(Transaction, Constructor) {
 }
 
 // Test with empty data
-Test(Transaction, NoData) {
+Test(transaction, no_data) {
   std::vector<std::byte> emptyData({});
   Transaction emptyTransaction(1, emptyData);
   cr_assert_eq(emptyTransaction.getLength(), 0);
@@ -34,7 +34,7 @@ Test(Transaction, NoData) {
 }
 
 // Test with data with one entry
-Test(Transaction, OneData) {
+Test(transaction, OneData) {
   std::vector<std::byte> oneData({std::byte{0x01}});
   Transaction oneTransaction(1, oneData);
   cr_assert_eq(oneTransaction.getLength(), 1);
