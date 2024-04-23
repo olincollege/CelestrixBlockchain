@@ -2,12 +2,12 @@
 #define CELESTRIXBLOCKCHAIN_BLOCK_H
 
 #include "Transaction.h"
+#include <cstdint>
 #include <ctime>
+#include <iostream>
+#include <sstream>
 #include <string>
 #include <vector>
-#include <sstream>
-#include <iostream>
-
 
 class Block {
 private:
@@ -37,7 +37,7 @@ public:
   bool validateBlock() const;
   std::vector<std::byte> getBlockSignature() const;
   std::vector<std::byte> serialize() const;
-  static Block deserialize(const std::vector<std::byte>& serializedData);
+  static Block deserialize(const std::vector<std::byte> &serializedData);
   std::vector<std::byte> calculateMerkleRoot() const;
   std::vector<std::byte> getMerkleRoot() const;
   int getNonce() const;

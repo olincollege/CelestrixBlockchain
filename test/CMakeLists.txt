@@ -16,10 +16,31 @@ endif()
 
 add_executable(test_transaction test_transaction.cpp)
 target_link_libraries(test_transaction
-    PRIVATE Transaction
+    PRIVATE Blockchain
     PUBLIC ${CRITERION}
 )
 add_test(
     NAME test_transaction
     COMMAND test_transaction ${CRITERION_FLAGS}
 )
+
+add_executable(test_blockchain test_blockchain.cpp)
+target_link_libraries(test_blockchain
+    PRIVATE Blockchain
+    PUBLIC ${CRITERION}
+)
+add_test(
+    NAME test_blockchain
+    COMMAND test_blockchain ${CRITERION_FLAGS}
+)
+
+
+add_executable(test_block test_block.cpp)
+target_link_libraries(test_block
+    PRIVATE Blockchain
+    PUBLIC ${CRITERION}
+)
+add_test(
+    NAME test_block
+    COMMAND test_block ${CRITERION_FLAGS}
+_)
