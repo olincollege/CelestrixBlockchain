@@ -1,6 +1,6 @@
 # Project config for src/
 
-add_executable(main main.cpp)
+#add_executable(main main.cpp)
 
 add_library(Blockchain
         Block.cpp Block.h
