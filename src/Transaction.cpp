@@ -31,28 +31,28 @@ Transaction Transaction::decode(const std::vector<std::byte> &encodedData) {
 }
 
 std::string Transaction::serialize() const {
-    nlohmann::json jsonObj;
-    jsonObj["type"] = type;
-    jsonObj["length"] = length;
-    std::vector<int> dataInt;
-    dataInt.reserve(data.size());
-    for (const auto& byte : data) {
-        dataInt.push_back(static_cast<int>(byte));
-    }
-    jsonObj["data"] = dataInt;
+  nlohmann::json jsonObj;
+  jsonObj["type"] = type;
+  jsonObj["length"] = length;
+  std::vector<int> dataInt;
+  dataInt.reserve(data.size());
+  for (const auto &byte : data) {
+    dataInt.push_back(static_cast<int>(byte));
+  }
+  jsonObj["data"] = dataInt;
 
-    return jsonObj.dump();
+  return jsonObj.dump();
 }
 
 Transaction Transaction::deserialize(const std::string &serializedData) {
-    nlohmann::json jsonObj = nlohmann::json::parse(serializedData);
-    int type = jsonObj["type"];
-    std::vector<std::byte> data;
-    const auto& dataInt = jsonObj["data"];
-    data.reserve(dataInt.size());
-    for (const auto& intValue : dataInt) {
-        data.push_back(static_cast<std::byte>(intValue));
-    }
+  nlohmann::json jsonObj = nlohmann::json::parse(serializedData);
+  int type = jsonObj["type"];
+  std::vector<std::byte> data;
+  const auto &dataInt = jsonObj["data"];
+  data.reserve(dataInt.size());
+  for (const auto &intValue : dataInt) {
+    data.push_back(static_cast<std::byte>(intValue));
+  }
 
-    return {type, data};
+  return {type, data};
 }

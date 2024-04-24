@@ -10,7 +10,8 @@ add_library(Blockchain
 
 # External libraries
 find_package(OpenSSL REQUIRED)
+find_package(nlohmann_json 3.2.0 REQUIRED)
 
-target_link_libraries(Blockchain PRIVATE OpenSSL::SSL OpenSSL::Crypto)
+target_link_libraries(Blockchain PRIVATE OpenSSL::SSL OpenSSL::Crypto ${nlohmann_json_INCLUDE_DIRS})
 
 #target_link_libraries(main PRIVATE )

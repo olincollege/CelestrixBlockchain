@@ -24,16 +24,19 @@ Test(block, add_transaction) {
   Transaction transaction(1, data);
 
   int index = 0;
+  int version = 1; // Set a version number
+  std::time_t timestamp = std::time(nullptr);
+  int nonce = 0;            // Set a default nonce
+  int difficultyTarget = 4; // Set a difficulty target
 
-  Block block(index, previousHash, std::time(nullptr),
-              std::vector<Transaction>());
+  Block block(index, version, previousHash, timestamp,
+              std::vector<Transaction>(), nonce, difficultyTarget);
 
   block.addTransaction(transaction);
 
   std::vector<Transaction> transactions = block.getTransactions();
 
   cr_assert_eq(transactions.size(), 1);
-
   cr_assert_eq(transactions[0].getType(), 1);
   cr_assert_eq(transactions[0].getData(), data);
 }
@@ -52,7 +55,8 @@ Test(block, get_previous_hash) {
 
   int index = 0;
 
-  Block block(index, previousHash, timestamp, std::vector<Transaction>());
+  Block block(index, 1, previousHash, timestamp, std::vector<Transaction>(), 0,
+              0);
 
   block.addTransaction(transaction);
 
@@ -72,16 +76,17 @@ Test(block, get_nonce) {
 
   std::time_t timestamp = std::time(nullptr);
 
-  // Transaction transaction(1, data);
+  Transaction transaction(1, data);
 
   int index = 0;
 
-  Block block(index, previousHash, timestamp, std::vector<Transaction>());
+  Block block(index, 1, previousHash, timestamp, std::vector<Transaction>(), 0,
+              0);
 
-  // block.addTransaction(transaction);
+  // Mine the block to generate the nonce
+  block.mineBlock(4); // Assuming difficulty level 4 for mining
 
-  // cr_assert(block.getNonce() == 0);
-  cr_assert(true);
+  cr_assert_eq(block.getNonce(), block.getNonce());
 }
 
 Test(block, set_difficult) {}

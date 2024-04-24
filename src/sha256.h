@@ -19,7 +19,7 @@ private:
   computeMessageSchedule(const std::vector<uint8_t> &block);
 
 public:
-    static std::vector<std::byte> hash(const std::vector<std::byte>& message);
+  static std::vector<std::byte> hash(const std::vector<std::byte> &message);
 };
 
 #endif // CELESTRIXBLOCKCHAIN_SHA256_H
