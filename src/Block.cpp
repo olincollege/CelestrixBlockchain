@@ -7,10 +7,7 @@ Block::Block(int index, int version, std::vector<std::byte> previousHash,
              int nonce, int difficultyTarget)
     : index(index), version(version), previousHash(std::move(previousHash)),
       timestamp(timestamp), transactions(std::move(transactions)), nonce(nonce),
-      difficultyTarget(difficultyTarget) {
-  merkleRoot = calculateMerkleRoot();
-  blockHash = calculateBlockHash();
-}
+      difficultyTarget(difficultyTarget), merkleRoot(), blockHash() {}
 
 std::time_t Block::getTimestamp() { return std::time(nullptr); }
 
