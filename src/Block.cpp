@@ -6,8 +6,8 @@ Block::Block(int index, int version, std::vector<std::byte> previousHash,
              std::time_t timestamp, std::vector<Transaction> transactions,
              int nonce, int difficultyTarget)
     : index(index), version(version), previousHash(std::move(previousHash)),
-      timestamp(timestamp), transactions(std::move(transactions)), nonce(nonce),
-      difficultyTarget(difficultyTarget), merkleRoot(), blockHash() {}
+      blockHash(), timestamp(timestamp), transactions(std::move(transactions)),
+      nonce(nonce), difficultyTarget(difficultyTarget) {}
 
 std::time_t Block::getTimestamp() { return std::time(nullptr); }
 
@@ -45,8 +45,6 @@ std::vector<std::byte> Block::calculateBlockHash() const {
 }
 
 void Block::mineBlock(int difficulty) {
-  merkleRoot = calculateMerkleRoot();
-  // Proof of Work - Mining
   std::vector<std::byte> target(static_cast<unsigned long>(difficulty / 8),
                                 static_cast<std::byte>(0x00));
   target.push_back(
@@ -70,7 +68,6 @@ int Block::getBlockSize() const {
                 sizeof(nonce) + sizeof(difficultyTarget);
   size += previousHash.size() * sizeof(std::byte);
   size += blockHash.size() * sizeof(std::byte);
-  size += merkleRoot.size() * sizeof(std::byte);
   size += blockSignature.size() * sizeof(std::byte);
   for (const auto &transaction : transactions) {
     size += sizeof(int);                                      // Size of type
@@ -185,14 +182,6 @@ std::string Block::serialize() const {
   }
   jsonObj["transactions"] = serializedTransactions;
 
-  // Serialize merkle root
-  std::vector<int> serializedMerkleRoot;
-  serializedMerkleRoot.reserve(merkleRoot.size());
-  for (const auto &byte : merkleRoot) {
-    serializedMerkleRoot.push_back(static_cast<int>(byte));
-  }
-  jsonObj["merkle_root"] = serializedMerkleRoot;
-
   // Serialize block signature
   std::vector<int> serializedBlockSignature;
   serializedBlockSignature.reserve(blockSignature.size());
@@ -228,12 +217,6 @@ Block Block::deserialize(const std::string &serializedData) {
         Transaction::deserialize(serializedTransaction.dump()));
   }
 
-  // Deserialize merkle root
-  std::vector<std::byte> merkleRoot;
-  for (const auto &intValue : jsonObj["merkle_root"]) {
-    merkleRoot.push_back(static_cast<std::byte>(intValue));
-  }
-
   // Deserialize block signature
   std::vector<std::byte> blockSignature;
   for (const auto &intValue : jsonObj["block_signature"]) {
@@ -243,42 +226,9 @@ Block Block::deserialize(const std::string &serializedData) {
   int nonce = jsonObj["nonce"];
   int difficultyTarget = jsonObj["difficulty_target"];
 
-  return {index,        version, previousHash,    timestamp,
-          transactions, nonce,   difficultyTarget};
+  return {index, version, previousHash, timestamp,
+          transactions, nonce, difficultyTarget};
 }
-
-std::vector<std::byte> Block::calculateMerkleRoot() const {
-  // extract transaction hashes
-  std::vector<std::vector<std::byte>> transactionHashes;
-  transactionHashes.reserve(transactions.size());
-  for (const auto &transaction : transactions) {
-    transactionHashes.push_back(sha256::hash(transaction.encodeData()));
-  }
-
-  // handle odd number of transactions
-  if (transactionHashes.size() % 2 != 0) {
-    transactionHashes.push_back(transactionHashes.back());
-  }
-
-  // merkle root calculation logic
-  while (transactionHashes.size() > 1) {
-    std::vector<std::vector<std::byte>> nextHashes;
-    for (size_t i = 0; i < transactionHashes.size(); i += 2) {
-      std::vector<std::byte> combinedHashes;
-      combinedHashes.insert(combinedHashes.end(), transactionHashes[i].begin(),
-                            transactionHashes[i].end());
-      combinedHashes.insert(combinedHashes.end(),
-                            transactionHashes[i + 1].begin(),
-                            transactionHashes[i + 1].end());
-      nextHashes.push_back(sha256::hash(combinedHashes));
-    }
-    transactionHashes = nextHashes;
-  }
-
-  return transactionHashes[0];
-}
-
-std::vector<std::byte> Block::getMerkleRoot() const { return merkleRoot; }
 
 int Block::getNonce() const { return nonce; }
 

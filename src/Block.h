@@ -24,7 +24,6 @@ private:
   std::time_t timestamp;
   std::vector<Transaction> transactions;
   // Proof of Work members
-  std::vector<std::byte> merkleRoot;
   std::vector<std::byte> blockSignature;
   int nonce{};
   int difficultyTarget{};
@@ -42,10 +41,8 @@ public:
   [[nodiscard]] int getVersion() const;
   [[nodiscard]] int getDifficulty() const;
   [[nodiscard]] int getBlockSize() const;
-  [[nodiscard]] std::vector<std::byte> getMerkleRoot() const;
   [[nodiscard]] int getNonce() const;
   [[nodiscard]] std::vector<std::byte> calculateBlockHash() const;
-  [[nodiscard]] std::vector<std::byte> calculateMerkleRoot() const;
   void mineBlock(int difficulty);
   [[nodiscard]] std::string serialize() const;
   static Block deserialize(const std::string &serializedData);

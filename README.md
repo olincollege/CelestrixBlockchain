@@ -20,8 +20,7 @@ sudo apt-get install libssl-dev
 **macOS** - run the below commands in a terminal (using homebrew)
 If you do not have homebrew, the instructions to obtain that are here: https://brew.sh 
 ```commandline
-sudo apt-get update
-sudo apt-get install nlohmann-json3-dev
+brew install openssl
 ```
 
 ### nlohmann json
@@ -31,7 +30,7 @@ This library is used for serializing and deserializing data in the JSON format w
 **Linux** - run the below commands in a terminal
 ```commandline
 sudo apt-get update
-sudo apt-get install libssl-dev
+sudo apt-get install nlohmann-json3-dev
 ```
 
 **macOS** - run the below commands in a terminal (using homebrew)

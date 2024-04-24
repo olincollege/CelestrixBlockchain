@@ -29,13 +29,6 @@ int main() {
     std::cout << std::hex << static_cast<int>(byte);
   }
   std::cout << std::endl;
-
-  std::cout << "Merkle Root: ";
-  for (const auto &byte : block.getMerkleRoot()) {
-    std::cout << std::hex << static_cast<int>(byte);
-  }
-  std::cout << std::endl;
-
   std::cout << "Nonce: " << block.getNonce() << std::endl;
   std::cout << "Difficulty Target: " << block.getDifficulty() << std::endl;
 
