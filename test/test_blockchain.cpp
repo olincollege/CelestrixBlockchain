@@ -1,64 +1,66 @@
 #include "../src/Blockchain.h"
 #include <criterion/criterion.h>
 
-
 Test(block, add_transaction) {
-    std::vector<std::byte> previousHash(
-            {std::byte{0x11}, std::byte{0x22}, std::byte{0x33}});
-    std::time_t timestamp = std::time(nullptr);
-    std::vector<Transaction> transactions;
+  std::vector<std::byte> previousHash(
+      {std::byte{0x11}, std::byte{0x22}, std::byte{0x33}});
+  std::time_t timestamp = std::time(nullptr);
+  std::vector<Transaction> transactions;
 
-    int index = 0;
-    int version = 1;
-    int nonce = 0;
-    int difficultyTarget = 5;
+  int index = 0;
+  int version = 1;
+  int nonce = 0;
+  int difficultyTarget = 5;
 
-    Block block(index, version, previousHash, timestamp, transactions, nonce, difficultyTarget);
+  Block block(index, version, previousHash, timestamp, transactions, nonce,
+              difficultyTarget);
 
-    std::vector<std::byte> data = {std::byte{0x01}, std::byte{0x02}, std::byte{0x03}};
-    Transaction transaction(1, data);
+  std::vector<std::byte> data = {std::byte{0x01}, std::byte{0x02},
+                                 std::byte{0x03}};
+  Transaction transaction(1, data);
 
-    block.addTransaction(transaction);
+  block.addTransaction(transaction);
 
-    std::vector<Transaction> updatedTransactions = block.getTransactions();
+  std::vector<Transaction> updatedTransactions = block.getTransactions();
 
-    cr_assert_eq(updatedTransactions.size(), 1);
-    cr_assert_eq(updatedTransactions[0].getType(), 1);
-    cr_assert_eq(updatedTransactions[0].getData(), data);
+  cr_assert_eq(updatedTransactions.size(), 1);
+  cr_assert_eq(updatedTransactions[0].getType(), 1);
+  cr_assert_eq(updatedTransactions[0].getData(), data);
 }
 
 Test(block, get_previous_hash) {
-    std::vector<std::byte> previousHash(
-            {std::byte{0x11}, std::byte{0x22}, std::byte{0x33}});
-    std::time_t timestamp = std::time(nullptr);
-    std::vector<Transaction> transactions;
+  std::vector<std::byte> previousHash(
+      {std::byte{0x11}, std::byte{0x22}, std::byte{0x33}});
+  std::time_t timestamp = std::time(nullptr);
+  std::vector<Transaction> transactions;
 
-    int index = 0;
-    int version = 1;
-    int nonce = 0;
-    int difficultyTarget = 5;
+  int index = 0;
+  int version = 1;
+  int nonce = 0;
+  int difficultyTarget = 5;
 
-    Block block(index, version, previousHash, timestamp, transactions, nonce, difficultyTarget);
+  Block block(index, version, previousHash, timestamp, transactions, nonce,
+              difficultyTarget);
 
-    cr_assert(block.getPreviousHash() == previousHash);
+  cr_assert(block.getPreviousHash() == previousHash);
 }
 
 Test(block, get_nonce) {
-    std::vector<std::byte> previousHash(
-            {std::byte{0x11}, std::byte{0x22}, std::byte{0x33}});
-    std::time_t timestamp = std::time(nullptr);
-    std::vector<Transaction> transactions;
+  std::vector<std::byte> previousHash(
+      {std::byte{0x11}, std::byte{0x22}, std::byte{0x33}});
+  std::time_t timestamp = std::time(nullptr);
+  std::vector<Transaction> transactions;
 
-    int index = 0;
-    int version = 1;
-    int nonce = 123; // Some arbitrary value for testing purposes
-    int difficultyTarget = 5;
+  int index = 0;
+  int version = 1;
+  int nonce = 123; // Some arbitrary value for testing purposes
+  int difficultyTarget = 5;
 
-    Block block(index, version, previousHash, timestamp, transactions, nonce, difficultyTarget);
+  Block block(index, version, previousHash, timestamp, transactions, nonce,
+              difficultyTarget);
 
-    cr_assert_eq(block.getNonce(), nonce);
+  cr_assert_eq(block.getNonce(), nonce);
 }
-
 
 // // Test blockchain printing
 // Test(blockchain, print_blockchain1) {
