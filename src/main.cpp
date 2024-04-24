@@ -1,36 +1,51 @@
 #include "Blockchain.h"
+#include "Block.h"
 
 int main() {
-  int index = 0;
-  int version = 1;
-  std::vector<std::byte> previousHash(
-      {std::byte{0x11}, std::byte{0x22}, std::byte{0x33}});
-  std::time_t timestamp = std::time(nullptr);
-  std::vector<Transaction> transactions;
-  int nonce = 0;
-  int difficultyTarget = 4;
+    // Initialize blockchain with the desired difficulty for mining
+    int difficulty = 4;
+    Blockchain blockchain(difficulty);
 
-  Block block(index, version, previousHash, timestamp, transactions, nonce,
-              difficultyTarget);
+    // Create data for transactions
+    std::vector<std::byte> data1 = {std::byte{0x01}, std::byte{0x02}, std::byte{0x03}};
+    std::vector<std::byte> data2 = {std::byte{0x04}, std::byte{0x05}, std::byte{0x06}};
+    std::vector<std::byte> data3 = {std::byte{0x10}, std::byte{0x11}, std::byte{0x12}};
 
-  std::vector<std::byte> data = {std::byte{0x01}, std::byte{0x02},
-                                 std::byte{0x03}};
+    // Create transactions
+    Transaction transaction1(1, data1);
+    Transaction transaction2(1, data2);
+    Transaction transaction3(1, data3);
 
-  Transaction transaction(1, data);
-  Transaction transaction1(1, data);
-  Transaction transaction2(1, data);
-  block.addTransaction(transaction1);
-  block.addTransaction(transaction2);
+    // create and mine the genesis block
+    Block genesisBlock(0, 1, std::vector<std::byte>(), std::time(nullptr), std::vector<Transaction>(), 1, difficulty);
+    genesisBlock.mineBlock(difficulty);
+    blockchain.addBlock(genesisBlock);
 
-  block.mineBlock(difficultyTarget);
+    // Create and mine the second block
+    Block block1(1, 1, genesisBlock.getBlockHash(), std::time(nullptr), std::vector<Transaction>(), 10, difficulty);
+    block1.addTransaction(transaction1);
+    block1.mineBlock(difficulty);
+    blockchain.addBlock(block1);
 
-  std::cout << "Block Hash: ";
-  for (const auto &byte : block.getBlockHash()) {
-    std::cout << std::hex << static_cast<int>(byte);
-  }
-  std::cout << std::endl;
-  std::cout << "Nonce: " << block.getNonce() << std::endl;
-  std::cout << "Difficulty Target: " << block.getDifficulty() << std::endl;
+    // Create and mine the third block
+    Block block2(2, 1, block1.getBlockHash(), std::time(nullptr), std::vector<Transaction>(), 23, difficulty);
+    block2.addTransaction(transaction2);
+    block2.addTransaction(transaction3);
+    block2.mineBlock(difficulty);
+    blockchain.addBlock(block2);
 
-  return 0;
+    // Print the blockchain
+    std::cout << "====================" << std::endl;
+    std::cout << "Celestrix Blockchain" << std::endl;
+    std::cout << "====================" << std::endl;
+    blockchain.printBlockchain();
+
+    // Verify the blockchain
+    if (blockchain.isChainValid()) {
+        std::cout << "Blockchain is valid." << std::endl;
+    } else {
+        std::cout << "Blockchain is invalid." << std::endl;
+    }
+
+    return 0;
 }
