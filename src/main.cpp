@@ -46,26 +46,26 @@ int main() {
   // create and mine the genesis block
   Block genesisBlock(0, 1, std::vector<std::byte>(), std::time(nullptr),
                      std::vector<Transaction>(), 1, difficulty);
-  genesisBlock.signBlock(privateKey);
   genesisBlock.mineBlock(difficulty);
   blockchain.addBlock(genesisBlock);
+  genesisBlock.signBlock(privateKey);
 
   // Create and mine block 1
   Block block1(1, 1, genesisBlock.getBlockHash(), std::time(nullptr),
                std::vector<Transaction>(), 10, difficulty);
   block1.addTransaction(transaction1);
-  block1.signBlock(privateKey);
   block1.mineBlock(difficulty);
   blockchain.addBlock(block1);
+  block1.signBlock(privateKey);
 
   // Create and mine block 2
   Block block2(2, 1, block1.getBlockHash(), std::time(nullptr),
                std::vector<Transaction>(), 23, difficulty);
   block2.addTransaction(transaction2);
   block2.addTransaction(transaction3);
-  block2.signBlock(privateKey);
   block2.mineBlock(difficulty);
   blockchain.addBlock(block2);
+  block2.signBlock(privateKey);
 
   // Verify signatures of the blocks
   if (genesisBlock.verifyBlockSignature(publicKey)) {
