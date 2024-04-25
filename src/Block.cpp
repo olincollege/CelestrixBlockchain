@@ -1,5 +1,4 @@
 #include "Block.h"
-
 #include "sha256.h"
 
 Block::Block(int index, int version, std::vector<std::byte> previousHash,
@@ -63,7 +62,7 @@ std::vector<Transaction> Block::getTransactions() const { return transactions; }
 
 int Block::getIndex() const { return index; }
 
-int Block::getBlockSize() const {
+[[maybe_unused]] int Block::getBlockSize() const {
   u_long size = sizeof(index) + sizeof(version) + sizeof(timestamp) +
                 sizeof(nonce) + sizeof(difficultyTarget);
   size += previousHash.size() * sizeof(std::byte);
@@ -155,11 +154,7 @@ bool Block::verifyBlockSignature(const EVP_PKEY *publicKey) const {
   return true;
 }
 
-std::vector<std::byte> Block::getBlockSignature() const {
-  return blockSignature;
-}
-
-std::string Block::serialize() const {
+[[maybe_unused]] std::string Block::serialize() const {
   nlohmann::json jsonObj;
   jsonObj["index"] = index;
   jsonObj["version"] = version;
@@ -196,7 +191,7 @@ std::string Block::serialize() const {
   return jsonObj.dump();
 }
 
-Block Block::deserialize(const std::string &serializedData) {
+[[maybe_unused]] Block Block::deserialize(const std::string &serializedData) {
   nlohmann::json jsonObj = nlohmann::json::parse(serializedData);
 
   int index = jsonObj["index"];
@@ -226,8 +221,8 @@ Block Block::deserialize(const std::string &serializedData) {
   int nonce = jsonObj["nonce"];
   int difficultyTarget = jsonObj["difficulty_target"];
 
-  return {index, version, previousHash, timestamp,
-          transactions, nonce, difficultyTarget};
+  return {index,        version, previousHash,    timestamp,
+          transactions, nonce,   difficultyTarget};
 }
 
 int Block::getNonce() const { return nonce; }
@@ -239,3 +234,33 @@ void Block::addTransaction(const Transaction &transaction) {
 }
 
 int Block::getVersion() const { return version; }
+
+EVP_PKEY *Block::readEVPPrivateKey(const char *filename) {
+  FILE *fp = fopen(filename, "rb");
+  if (!fp) {
+    std::cerr << "Error opening private key file" << std::endl;
+    return nullptr;
+  }
+  EVP_PKEY *evpPrivateKey = PEM_read_PrivateKey(fp, nullptr, nullptr, nullptr);
+  fclose(fp);
+  if (!evpPrivateKey) {
+    std::cerr << "Error reading private key" << std::endl;
+    return nullptr;
+  }
+  return evpPrivateKey;
+}
+
+EVP_PKEY *Block::readEVPPublicKey(const char *filename) {
+  FILE *fp = fopen(filename, "rb");
+  if (!fp) {
+    std::cerr << "Error opening public key file" << std::endl;
+    return nullptr;
+  }
+  EVP_PKEY *evpPublicKey = PEM_read_PUBKEY(fp, nullptr, nullptr, nullptr);
+  fclose(fp);
+  if (!evpPublicKey) {
+    std::cerr << "Error reading public key" << std::endl;
+    return nullptr;
+  }
+  return evpPublicKey;
+}

@@ -1,12 +1,6 @@
 #include "Blockchain.h"
 
-Blockchain::Blockchain(int difficulty) : difficulty(difficulty) {
-  // create a genesis block
-  Block genesisBlock(0, 1, std::vector<std::byte>(), std::time(nullptr),
-                     std::vector<Transaction>(), 1, difficulty);
-  genesisBlock.mineBlock(difficulty);
-  chain.push_back(genesisBlock);
-}
+Blockchain::Blockchain(int difficulty) : difficulty(difficulty) {}
 
 void Blockchain::addBlock(const Block &block) {
   int newIndex = chain.empty() ? 0 : chain.back().getIndex() + 1;
