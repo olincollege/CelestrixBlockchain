@@ -1,6 +1,12 @@
 #include "Blockchain.h"
 
-Blockchain::Blockchain(int difficulty) : difficulty(difficulty) {}
+Blockchain::Blockchain(int difficulty) : difficulty(difficulty) {
+  // create a genesis block
+  Block genesisBlock(0, 1, std::vector<std::byte>(), std::time(nullptr),
+                     std::vector<Transaction>(), 1, difficulty);
+  genesisBlock.mineBlock(difficulty);
+  chain.push_back(genesisBlock);
+}
 
 void Blockchain::addBlock(const Block &block) {
   int newIndex = chain.empty() ? 0 : chain.back().getIndex() + 1;
@@ -52,8 +58,14 @@ void Blockchain::printBlockchain() const {
     std::cout << "Timestamp: " << Block::getTimestamp() << std::endl;
     std::cout << "Transactions: " << std::endl;
     for (const Transaction &transaction : block.getTransactions()) {
-      std::cout << "Type: " << transaction.getType() << std::endl;
-      std::cout << "Length: " << transaction.getLength() << std::endl;
+      std::cout << "\t Type: " << transaction.getType() << std::endl;
+      std::cout << "\t Length: " << transaction.getLength() << std::endl;
+      std::cout << "\t Data: ";
+      for (std::byte dataByte : transaction.getData()) {
+        std::cout << static_cast<unsigned>(dataByte) << "";
+      }
+      std::cout << std::endl;
+      std::cout << "\t-------" << std::endl;
     }
     std::cout << std::endl;
   }

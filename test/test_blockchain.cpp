@@ -47,72 +47,9 @@ Test(blockchain, chain_validity) {
                difficultyTarget);
 
   blockchain.addBlock(block1);
-  // blockchain.addBlock(block2);
+  blockchain.addBlock(block2);
 
-  // cr_assert(blockchain.isChainValid(), "Chain validity failed.");
-
-  cr_assert(true);
+  cr_assert(blockchain.isChainValid(), "Chain validity failed.");
 }
 
-// // Test blockchain printing
-// Test(blockchain, print_blockchain1) {
-//   Blockchain blockchain(3);
-
-//   std::vector<std::byte> data(
-//       {std::byte{0x01}, std::byte{0x02}, std::byte{0x03}});
-//   Transaction transaction1(1, data);
-//   Transaction transaction2(2, data);
-
-//   std::vector<std::byte> previousHash(
-//       {std::byte{0x11}, std::byte{0x22}, std::byte{0x33}});
-//   std::time_t timestamp = std::time(nullptr);
-//   std::vector<Transaction> transactions;
-
-//   int index = 0;
-//   int version = 1;
-//   int nonce = 0;
-//   int difficultyTarget = 5;
-
-//   Block block1(index, version, previousHash, timestamp, transactions, nonce,
-//                difficultyTarget);
-
-//   block1.addTransaction(transaction1);
-//   block1.addTransaction(transaction2);
-
-//   blockchain.addBlock(block1);
-
-//   std::stringstream expected_output;
-//   expected_output << "Block Hash: ";
-//   for (const auto &byte : block1.getBlockHash()) {
-//     expected_output << std::hex << static_cast<int>(byte);
-//   }
-
-//   expected_output << std::endl;
-//   expected_output << "Previous Hash: ";
-//   for (const auto &byte : block1.getPreviousHash()) {
-//     expected_output << std::hex << static_cast<int>(byte);
-//   }
-
-//   expected_output << std::endl;
-//   expected_output << "Timestamp: " << block1.getTimestamp() << std::endl;
-//   expected_output << "Transactions: " << std::endl;
-//   for (const Transaction &transaction : block1.getTransactions()) {
-//     expected_output << "Type: " << transaction.getType() << std::endl;
-//     expected_output << "Length: " << transaction.getLength() << std::endl;
-//   }
-
-//   expected_output << std::endl;
-
-//   std::stringstream actual_output;
-//   std::streambuf *cout_buffer = std::cout.rdbuf();
-//   std::cout.rdbuf(actual_output.rdbuf());
-
-//   blockchain.printBlockchain();
-
-//   std::cout.rdbuf(cout_buffer);
-
-//   cr_assert_str_eq(expected_output.str().c_str(),
-//   actual_output.str().c_str(),
-//                    "Printed blockchain output doesn't match expected
-//                    output");
-// }
+// Test blockchain printing
