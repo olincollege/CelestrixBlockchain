@@ -29,9 +29,6 @@ std::vector<std::byte> Block::calculateBlockHash() const {
     }
   }
   ss << nonce;
-  for (const auto &byte : blockSignature) {
-    ss << static_cast<int>(byte);
-  }
   ss << difficultyTarget;
 
   std::string data = ss.str();
@@ -74,77 +71,6 @@ int Block::getIndex() const { return index; }
     size += transaction.getData().size() * sizeof(std::byte); // Size of data
   }
   return (int)size;
-}
-
-[[maybe_unused]] std::string Block::serialize() const {
-  nlohmann::json jsonObj;
-  jsonObj["index"] = index;
-  jsonObj["version"] = version;
-
-  // Serialize previous hash
-  std::vector<int> serializedPreviousHash;
-  serializedPreviousHash.reserve(previousHash.size());
-  for (const auto &byte : previousHash) {
-    serializedPreviousHash.push_back(static_cast<int>(byte));
-  }
-  jsonObj["previous_hash"] = serializedPreviousHash;
-
-  jsonObj["timestamp"] = static_cast<int64_t>(timestamp);
-
-  // Serialize transactions
-  std::vector<std::string> serializedTransactions;
-  serializedTransactions.reserve(transactions.size());
-  for (const auto &transaction : transactions) {
-    serializedTransactions.push_back(transaction.serialize());
-  }
-  jsonObj["transactions"] = serializedTransactions;
-
-  // Serialize block signature
-  std::vector<int> serializedBlockSignature;
-  serializedBlockSignature.reserve(blockSignature.size());
-  for (const auto &byte : blockSignature) {
-    serializedBlockSignature.push_back(static_cast<int>(byte));
-  }
-  jsonObj["block_signature"] = serializedBlockSignature;
-
-  jsonObj["nonce"] = nonce;
-  jsonObj["difficulty_target"] = difficultyTarget;
-
-  return jsonObj.dump();
-}
-
-[[maybe_unused]] Block Block::deserialize(const std::string &serializedData) {
-  nlohmann::json jsonObj = nlohmann::json::parse(serializedData);
-
-  int index = jsonObj["index"];
-  int version = jsonObj["version"];
-
-  // Deserialize previous hash
-  std::vector<std::byte> previousHash;
-  for (const auto &intValue : jsonObj["previous_hash"]) {
-    previousHash.push_back(static_cast<std::byte>(intValue));
-  }
-
-  auto timestamp = static_cast<std::time_t>(jsonObj["timestamp"]);
-
-  // Deserialize transactions
-  std::vector<Transaction> transactions;
-  for (const auto &serializedTransaction : jsonObj["transactions"]) {
-    transactions.push_back(
-        Transaction::deserialize(serializedTransaction.dump()));
-  }
-
-  // Deserialize block signature
-  std::vector<std::byte> blockSignature;
-  for (const auto &intValue : jsonObj["block_signature"]) {
-    blockSignature.push_back(static_cast<std::byte>(intValue));
-  }
-
-  int nonce = jsonObj["nonce"];
-  int difficultyTarget = jsonObj["difficulty_target"];
-
-  return {index,        version, previousHash,    timestamp,
-          transactions, nonce,   difficultyTarget};
 }
 
 int Block::getNonce() const { return nonce; }
@@ -283,4 +209,75 @@ std::pair<EVP_PKEY *, EVP_PKEY *> Block::generateEVPKeyPair() {
   EVP_PKEY_CTX_free(ctx);
 
   return std::make_pair(pkey, pubkey);
+}
+
+[[maybe_unused]] std::string Block::serialize() const {
+    nlohmann::json jsonObj;
+    jsonObj["index"] = index;
+    jsonObj["version"] = version;
+
+    // Serialize previous hash
+    std::vector<int> serializedPreviousHash;
+    serializedPreviousHash.reserve(previousHash.size());
+    for (const auto &byte : previousHash) {
+        serializedPreviousHash.push_back(static_cast<int>(byte));
+    }
+    jsonObj["previous_hash"] = serializedPreviousHash;
+
+    jsonObj["timestamp"] = static_cast<int64_t>(timestamp);
+
+    // Serialize transactions
+    std::vector<std::string> serializedTransactions;
+    serializedTransactions.reserve(transactions.size());
+    for (const auto &transaction : transactions) {
+        serializedTransactions.push_back(transaction.serialize());
+    }
+    jsonObj["transactions"] = serializedTransactions;
+
+    // Serialize block signature
+    std::vector<int> serializedBlockSignature;
+    serializedBlockSignature.reserve(blockSignature.size());
+    for (const auto &byte : blockSignature) {
+        serializedBlockSignature.push_back(static_cast<int>(byte));
+    }
+    jsonObj["block_signature"] = serializedBlockSignature;
+
+    jsonObj["nonce"] = nonce;
+    jsonObj["difficulty_target"] = difficultyTarget;
+
+    return jsonObj.dump();
+}
+
+[[maybe_unused]] Block Block::deserialize(const std::string &serializedData) {
+    nlohmann::json jsonObj = nlohmann::json::parse(serializedData);
+
+    int index = jsonObj["index"];
+    int version = jsonObj["version"];
+
+    // Deserialize previous hash
+    std::vector<std::byte> previousHash;
+    for (const auto &intValue : jsonObj["previous_hash"]) {
+        previousHash.push_back(static_cast<std::byte>(intValue));
+    }
+
+    auto timestamp = static_cast<std::time_t>(jsonObj["timestamp"]);
+
+    // Deserialize transactions
+    std::vector<Transaction> transactions;
+    for (const auto &serializedTransaction : jsonObj["transactions"]) {
+        transactions.push_back(
+                Transaction::deserialize(serializedTransaction.dump()));
+    }
+
+    // Deserialize block signature
+    std::vector<std::byte> blockSignature;
+    for (const auto &intValue : jsonObj["block_signature"]) {
+        blockSignature.push_back(static_cast<std::byte>(intValue));
+    }
+
+    int nonce = jsonObj["nonce"];
+    int difficultyTarget = jsonObj["difficulty_target"];
+
+    return {index,        version, previousHash,    timestamp,
+            transactions, nonce,   difficultyTarget};
 }
