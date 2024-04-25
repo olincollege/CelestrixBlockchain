@@ -1,5 +1,4 @@
 #include "Block.h"
-
 #include "sha256.h"
 
 Block::Block(int index, int version, std::vector<std::byte> previousHash,
@@ -63,7 +62,7 @@ std::vector<Transaction> Block::getTransactions() const { return transactions; }
 
 int Block::getIndex() const { return index; }
 
-int Block::getBlockSize() const {
+[[maybe_unused]] int Block::getBlockSize() const {
   u_long size = sizeof(index) + sizeof(version) + sizeof(timestamp) +
                 sizeof(nonce) + sizeof(difficultyTarget);
   size += previousHash.size() * sizeof(std::byte);
@@ -78,88 +77,84 @@ int Block::getBlockSize() const {
 }
 
 bool Block::signBlock(const EVP_PKEY *privateKey) {
-  // message digest context for signing
-  EVP_MD_CTX *mdCtx = EVP_MD_CTX_new();
-  if (!mdCtx) {
-    return false;
-  }
+    // message digest context for signing
+    EVP_MD_CTX *mdCtx = EVP_MD_CTX_new();
+    if (!mdCtx) {
+        return false;
+    }
 
-  // initialize it with SHA256
-  if (EVP_DigestSignInit(mdCtx, nullptr, EVP_sha256(), nullptr,
-                         const_cast<EVP_PKEY *>(privateKey)) != 1) {
+    // initialize it with SHA256
+    if (EVP_DigestSignInit(mdCtx, nullptr, EVP_sha256(), nullptr,
+                           const_cast<EVP_PKEY *>(privateKey)) != 1) {
+        EVP_MD_CTX_free(mdCtx);
+        return false;
+    }
+
+    // calculate the hash of the block
+    std::vector<std::byte> hash = calculateBlockHash();
+
+    // sign the hash
+    if (EVP_DigestSign(mdCtx, nullptr, nullptr,
+                       reinterpret_cast<const unsigned char *>(hash.data()),
+                       hash.size()) != 1) {
+        EVP_MD_CTX_free(mdCtx);
+        return false;
+    }
+
+    // allocate memory for length of signature
+    size_t lenSignature;
+    if (EVP_DigestSign(mdCtx, nullptr, &lenSignature, nullptr, 0) != 1) {
+        EVP_MD_CTX_free(mdCtx);
+        return false;
+    }
+    blockSignature.resize(lenSignature);
+
+    // sign the hash and store signature
+    if (EVP_DigestSign(
+            mdCtx, reinterpret_cast<unsigned char *>(blockSignature.data()),
+            &lenSignature, reinterpret_cast<const unsigned char *>(hash.data()),
+            hash.size()) != 1) {
+        EVP_MD_CTX_free(mdCtx);
+        return false;
+    }
+
     EVP_MD_CTX_free(mdCtx);
-    return false;
-  }
-
-  // calculate the hash of the block
-  std::vector<std::byte> hash = calculateBlockHash();
-
-  // sign the hash
-  if (EVP_DigestSign(mdCtx, nullptr, nullptr,
-                     reinterpret_cast<const unsigned char *>(hash.data()),
-                     hash.size()) != 1) {
-    EVP_MD_CTX_free(mdCtx);
-    return false;
-  }
-
-  // allocate memory for length of signature
-  size_t lenSignature;
-  if (EVP_DigestSign(mdCtx, nullptr, &lenSignature, nullptr, 0) != 1) {
-    EVP_MD_CTX_free(mdCtx);
-    return false;
-  }
-  blockSignature.resize(lenSignature);
-
-  // sign the hash and store signature
-  if (EVP_DigestSign(
-          mdCtx, reinterpret_cast<unsigned char *>(blockSignature.data()),
-          &lenSignature, reinterpret_cast<const unsigned char *>(hash.data()),
-          hash.size()) != 1) {
-    EVP_MD_CTX_free(mdCtx);
-    return false;
-  }
-
-  EVP_MD_CTX_free(mdCtx);
-  return true;
+    return true;
 }
 
 bool Block::verifyBlockSignature(const EVP_PKEY *publicKey) const {
-  // message digest context for signing
-  EVP_MD_CTX *mdCtx = EVP_MD_CTX_new();
-  if (!mdCtx) {
-    return false;
-  }
+    // message digest context for signing
+    EVP_MD_CTX *mdCtx = EVP_MD_CTX_new();
+    if (!mdCtx) {
+        return false;
+    }
 
-  // initialize it with SHA256
-  if (EVP_DigestSignInit(mdCtx, nullptr, EVP_sha256(), nullptr,
-                         const_cast<EVP_PKEY *>(publicKey)) != 1) {
+    // initialize it with SHA256
+    if (EVP_DigestSignInit(mdCtx, nullptr, EVP_sha256(), nullptr,
+                           const_cast<EVP_PKEY *>(publicKey)) != 1) {
+        EVP_MD_CTX_free(mdCtx);
+        return false;
+    }
+
+    // calculate the hash of the block
+    std::vector<std::byte> hash = calculateBlockHash();
+
+    // verify the signature
+    if (EVP_DigestVerify(
+            mdCtx, reinterpret_cast<const unsigned char *>(blockSignature.data()),
+            blockSignature.size(),
+            reinterpret_cast<const unsigned char *>(hash.data()),
+            hash.size()) != 1) {
+        EVP_MD_CTX_free(mdCtx);
+        return false;
+    }
+
     EVP_MD_CTX_free(mdCtx);
-    return false;
-  }
 
-  // calculate the hash of the block
-  std::vector<std::byte> hash = calculateBlockHash();
-
-  // verify the signature
-  if (EVP_DigestVerify(
-          mdCtx, reinterpret_cast<const unsigned char *>(blockSignature.data()),
-          blockSignature.size(),
-          reinterpret_cast<const unsigned char *>(hash.data()),
-          hash.size()) != 1) {
-    EVP_MD_CTX_free(mdCtx);
-    return false;
-  }
-
-  EVP_MD_CTX_free(mdCtx);
-
-  return true;
+    return true;
 }
 
-std::vector<std::byte> Block::getBlockSignature() const {
-  return blockSignature;
-}
-
-std::string Block::serialize() const {
+[[maybe_unused]] std::string Block::serialize() const {
   nlohmann::json jsonObj;
   jsonObj["index"] = index;
   jsonObj["version"] = version;
@@ -196,7 +191,7 @@ std::string Block::serialize() const {
   return jsonObj.dump();
 }
 
-Block Block::deserialize(const std::string &serializedData) {
+[[maybe_unused]] Block Block::deserialize(const std::string &serializedData) {
   nlohmann::json jsonObj = nlohmann::json::parse(serializedData);
 
   int index = jsonObj["index"];
@@ -239,3 +234,33 @@ void Block::addTransaction(const Transaction &transaction) {
 }
 
 int Block::getVersion() const { return version; }
+
+EVP_PKEY* Block::readEVPPrivateKey(const char* filename) {
+    FILE* fp = fopen(filename, "rb");
+    if (!fp) {
+        std::cerr << "Error opening private key file" << std::endl;
+        return nullptr;
+    }
+    EVP_PKEY* evpPrivateKey = PEM_read_PrivateKey(fp, nullptr, nullptr, nullptr);
+    fclose(fp);
+    if (!evpPrivateKey) {
+        std::cerr << "Error reading private key" << std::endl;
+        return nullptr;
+    }
+    return evpPrivateKey;
+}
+
+EVP_PKEY* Block::readEVPPublicKey(const char* filename) {
+    FILE* fp = fopen(filename, "rb");
+    if (!fp) {
+        std::cerr << "Error opening public key file" << std::endl;
+        return nullptr;
+    }
+    EVP_PKEY* evpPublicKey = PEM_read_PUBKEY(fp, nullptr, nullptr, nullptr);
+    fclose(fp);
+    if (!evpPublicKey) {
+        std::cerr << "Error reading public key" << std::endl;
+        return nullptr;
+    }
+    return evpPublicKey;
+}

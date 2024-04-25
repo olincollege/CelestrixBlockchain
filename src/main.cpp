@@ -1,32 +1,82 @@
 #include "Blockchain.h"
+#include "Block.h"
 
 int main() {
-  Blockchain blockchain(3);
+    std::cout << "==========================================================================" << std::endl;
+    std::cout << "==========================================================================" << std::endl;
+    std::cout << "                          Celestrix Blockchain                            " << std::endl;
+    std::cout << "==========================================================================" << std::endl;
+    std::cout << "==========================================================================" << std::endl;
 
-  std::vector<std::byte> data(
-      {std::byte{0x01}, std::byte{0x02}, std::byte{0x03}});
-  Transaction transaction1(1, data);
-  Transaction transaction2(2, data);
+    // Initialize blockchain with the desired difficulty for mining
+    int difficulty = 4;
+    Blockchain blockchain(difficulty);
 
-  std::vector<std::byte> previousHash(
-      {std::byte{0x11}, std::byte{0x22}, std::byte{0x33}});
-  std::time_t timestamp = std::time(nullptr);
-  std::vector<Transaction> transactions;
+    // Generate RSA key pair
+    std::cout << "                       Block Signature Verification                       " << std::endl;
+    EVP_PKEY *privateKey = Block::readEVPPrivateKey("private_key.pem");
+    EVP_PKEY *publicKey = Block::readEVPPublicKey("public_key.pem");
 
-  int index = 0;
-  int version = 1;
-  int nonce = 0;
-  int difficultyTarget = 5;
+    // Create data for transactions
+    std::vector<std::byte> data1 = {std::byte{0x01}, std::byte{0x02}, std::byte{0x03}};
+    std::vector<std::byte> data2 = {std::byte{0x04}, std::byte{0x05}, std::byte{0x06}};
+    std::vector<std::byte> data3 = {std::byte{0x10}, std::byte{0x11}, std::byte{0x12}};
 
-  Block block1(index, version, previousHash, timestamp, transactions, nonce,
-               difficultyTarget);
+    // Create transactions
+    Transaction transaction1(1, data1);
+    Transaction transaction2(1, data2);
+    Transaction transaction3(1, data3);
 
-  block1.addTransaction(transaction1);
-  block1.addTransaction(transaction2);
+    // create and mine the genesis block
+    Block genesisBlock(0, 1, std::vector<std::byte>(), std::time(nullptr), std::vector<Transaction>(), 1, difficulty);
+    genesisBlock.signBlock(privateKey);
+    genesisBlock.mineBlock(difficulty);
+    blockchain.addBlock(genesisBlock);
 
-  blockchain.addBlock(block1);
+    // Create and mine block 1
+    Block block1(1, 1, genesisBlock.getBlockHash(), std::time(nullptr), std::vector<Transaction>(), 10, difficulty);
+    block1.addTransaction(transaction1);
+    block1.signBlock(privateKey);
+    block1.mineBlock(difficulty);
+    blockchain.addBlock(block1);
 
-  blockchain.printBlockchain();
+    // Create and mine block 2
+    Block block2(2, 1, block1.getBlockHash(), std::time(nullptr), std::vector<Transaction>(), 23, difficulty);
+    block2.addTransaction(transaction2);
+    block2.addTransaction(transaction3);
+    block2.signBlock(privateKey);
+    block2.mineBlock(difficulty);
+    blockchain.addBlock(block2);
 
-  return 0;
+    // Verify signatures of the blocks
+    if (genesisBlock.verifyBlockSignature(publicKey)) {
+        std::cout << "Signature of genesis block is valid." << std::endl;
+    } else {
+        std::cout << "Signature of genesis block is invalid." << std::endl;
+    }
+    if (block1.verifyBlockSignature(publicKey)) {
+        std::cout << "Signature of block 1 is valid." << std::endl;
+    } else {
+        std::cout << "Signature of block 1 is invalid." << std::endl;
+    }
+    if (block2.verifyBlockSignature(publicKey)) {
+        std::cout << "Signature of block 2 is valid." << std::endl;
+    } else {
+        std::cout << "Signature of block 2 is invalid." << std::endl;
+    }
+    std::cout << "==========================================================================" << std::endl;
+
+    // Print the blockchain
+    blockchain.printBlockchain();
+
+    std::cout << "==========================================================================" << std::endl;
+    // Verify the blockchain
+    if (blockchain.isChainValid()) {
+        std::cout << "Blockchain is valid." << std::endl;
+    } else {
+        std::cout << "Blockchain is invalid." << std::endl;
+    }
+
+    std::cout << "==========================================================================" << std::endl;
+    return 0;
 }

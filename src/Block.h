@@ -35,20 +35,21 @@ public:
   [[nodiscard]] std::vector<std::byte> getBlockHash() const;
   [[nodiscard]] std::vector<std::byte> getPreviousHash() const;
   [[nodiscard]] std::vector<Transaction> getTransactions() const;
-  [[nodiscard]] std::vector<std::byte> getBlockSignature() const;
   static std::time_t getTimestamp();
   [[nodiscard]] int getIndex() const;
   [[nodiscard]] int getVersion() const;
   [[nodiscard]] int getDifficulty() const;
-  [[nodiscard]] int getBlockSize() const;
+  [[maybe_unused]] [[nodiscard]] int getBlockSize() const;
   [[nodiscard]] int getNonce() const;
   [[nodiscard]] std::vector<std::byte> calculateBlockHash() const;
   void mineBlock(int difficulty);
-  [[nodiscard]] std::string serialize() const;
-  static Block deserialize(const std::string &serializedData);
+  [[maybe_unused]] [[nodiscard]] std::string serialize() const;
+  [[maybe_unused]] static Block deserialize(const std::string &serializedData);
   void addTransaction(const Transaction &transaction);
   bool signBlock(const EVP_PKEY *privateKey);
   bool verifyBlockSignature(const EVP_PKEY *publicKey) const;
+  static EVP_PKEY* readEVPPrivateKey(const char* filename);
+  static EVP_PKEY* readEVPPublicKey(const char* filename);
 };
 
 #endif // CELESTRIXBLOCKCHAIN_BLOCK_H
