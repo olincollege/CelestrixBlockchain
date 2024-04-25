@@ -48,8 +48,7 @@ public:
   void addTransaction(const Transaction &transaction);
   bool signBlock(const EVP_PKEY *privateKey);
   bool verifyBlockSignature(const EVP_PKEY *publicKey) const;
-  static EVP_PKEY *readEVPPrivateKey(const char *filename);
-  static EVP_PKEY *readEVPPublicKey(const char *filename);
+  static std::pair<EVP_PKEY *, EVP_PKEY *> generateEVPKeyPair();
 };
 
 #endif // CELESTRIXBLOCKCHAIN_BLOCK_H

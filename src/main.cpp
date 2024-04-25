@@ -22,12 +22,13 @@ int main() {
   int difficulty = 4;
   Blockchain blockchain(difficulty);
 
-  // Generate RSA key pair
+  // Generate EVP key pair for signature verification
   std::cout << "                       Block Signature Verification            "
                "           "
             << std::endl;
-  EVP_PKEY *privateKey = Block::readEVPPrivateKey("private_key.pem");
-  EVP_PKEY *publicKey = Block::readEVPPublicKey("public_key.pem");
+  std::pair<EVP_PKEY *, EVP_PKEY *> keyPair = Block::generateEVPKeyPair();
+  EVP_PKEY *privateKey = keyPair.first;
+  EVP_PKEY *publicKey = keyPair.second;
 
   // Create data for transactions
   std::vector<std::byte> data1 = {std::byte{0x01}, std::byte{0x02},
