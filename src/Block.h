@@ -2,7 +2,6 @@
 #define CELESTRIXBLOCKCHAIN_BLOCK_H
 
 #include "Transaction.h"
-#include "nlohmann/json.hpp"
 #include <cstdint>
 #include <ctime>
 #include <iostream>
@@ -43,12 +42,9 @@ public:
   [[nodiscard]] int getNonce() const;
   [[nodiscard]] std::vector<std::byte> calculateBlockHash() const;
   void mineBlock(int difficulty);
-  [[maybe_unused]] [[nodiscard]] std::string serialize() const;
-  [[maybe_unused]] static Block deserialize(const std::string &serializedData);
   void addTransaction(const Transaction &transaction);
-  bool signBlock(const EVP_PKEY *privateKey);
-  bool verifyBlockSignature(const EVP_PKEY *publicKey) const;
-  static std::pair<EVP_PKEY *, EVP_PKEY *> generateEVPKeyPair();
+  bool signBlock();
+  [[nodiscard]] bool verifyBlockSignature() const;
 };
 
 #endif // CELESTRIXBLOCKCHAIN_BLOCK_H

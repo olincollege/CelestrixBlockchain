@@ -22,18 +22,3 @@ If you do not have homebrew, the instructions to obtain that are here: https://b
 ```commandline
 brew install openssl
 ```
-
-### nlohmann json
-
-This library is used for serializing and deserializing data in the JSON format when communicating using a P2P network.
-
-**Linux** - run the below commands in a terminal
-```commandline
-sudo apt-get update
-sudo apt-get install nlohmann-json3-dev
-```
-
-**macOS** - run the below commands in a terminal (using homebrew)
-```commandline
-brew install nlohmann-json
-```

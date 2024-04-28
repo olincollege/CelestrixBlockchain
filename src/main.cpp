@@ -22,14 +22,6 @@ int main() {
   int difficulty = 4;
   Blockchain blockchain(difficulty);
 
-  // Generate EVP key pair for signature verification
-  std::cout << "                       Block Signature Verification            "
-               "           "
-            << std::endl;
-  std::pair<EVP_PKEY *, EVP_PKEY *> keyPair = Block::generateEVPKeyPair();
-  EVP_PKEY *privateKey = keyPair.first;
-  EVP_PKEY *publicKey = keyPair.second;
-
   // Create data for transactions
   std::vector<std::byte> data1 = {std::byte{0x01}, std::byte{0x02},
                                   std::byte{0x03}};
@@ -43,20 +35,25 @@ int main() {
   Transaction transaction2(1, data2);
   Transaction transaction3(1, data3);
 
+  // signature verification
+  std::cout << "                       Block Signature Verification            "
+               "           "
+               << std::endl;
+
   // create and mine the genesis block
   Block genesisBlock(0, 1, std::vector<std::byte>(), std::time(nullptr),
                      std::vector<Transaction>(), 1, difficulty);
   genesisBlock.mineBlock(difficulty);
+  genesisBlock.signBlock();
   blockchain.addBlock(genesisBlock);
-  genesisBlock.signBlock(privateKey);
 
   // Create and mine block 1
   Block block1(1, 1, genesisBlock.getBlockHash(), std::time(nullptr),
                std::vector<Transaction>(), 10, difficulty);
   block1.addTransaction(transaction1);
   block1.mineBlock(difficulty);
+  block1.signBlock();
   blockchain.addBlock(block1);
-  block1.signBlock(privateKey);
 
   // Create and mine block 2
   Block block2(2, 1, block1.getBlockHash(), std::time(nullptr),
@@ -64,21 +61,21 @@ int main() {
   block2.addTransaction(transaction2);
   block2.addTransaction(transaction3);
   block2.mineBlock(difficulty);
+  block2.signBlock();
   blockchain.addBlock(block2);
-  block2.signBlock(privateKey);
 
   // Verify signatures of the blocks
-  if (genesisBlock.verifyBlockSignature(publicKey)) {
+  if (genesisBlock.verifyBlockSignature()) {
     std::cout << "Signature of genesis block is valid." << std::endl;
   } else {
     std::cout << "Signature of genesis block is invalid." << std::endl;
   }
-  if (block1.verifyBlockSignature(publicKey)) {
+  if (block1.verifyBlockSignature()) {
     std::cout << "Signature of block 1 is valid." << std::endl;
   } else {
     std::cout << "Signature of block 1 is invalid." << std::endl;
   }
-  if (block2.verifyBlockSignature(publicKey)) {
+  if (block2.verifyBlockSignature()) {
     std::cout << "Signature of block 2 is valid." << std::endl;
   } else {
     std::cout << "Signature of block 2 is invalid." << std::endl;
