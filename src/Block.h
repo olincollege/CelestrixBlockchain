@@ -43,8 +43,9 @@ public:
   [[nodiscard]] std::vector<std::byte> calculateBlockHash() const;
   void mineBlock(int difficulty);
   void addTransaction(const Transaction &transaction);
-  bool signBlock();
-  [[nodiscard]] bool verifyBlockSignature() const;
+  bool signBlock(EVP_PKEY *privateKey);
+  [[nodiscard]] bool verifyBlockSignature(EVP_PKEY *publicKey) const;
+  static std::pair<EVP_PKEY *, EVP_PKEY *> generateEVPKeyPair();
 };
 
 #endif // CELESTRIXBLOCKCHAIN_BLOCK_H
