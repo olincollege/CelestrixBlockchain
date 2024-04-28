@@ -52,9 +52,6 @@ Test(blockchain, chain_validity) {
   int difficulty = 4;
   Blockchain blockchain(difficulty);
 
-  std::pair<EVP_PKEY *, EVP_PKEY *> keyPair = Block::generateEVPKeyPair();
-  EVP_PKEY *privateKey = keyPair.first;
-
   std::vector<std::byte> data1 = {std::byte{0x01}, std::byte{0x02},
                                   std::byte{0x03}};
   std::vector<std::byte> data2 = {std::byte{0x04}, std::byte{0x05},
@@ -70,14 +67,14 @@ Test(blockchain, chain_validity) {
                      std::vector<Transaction>(), 1, difficulty);
   genesisBlock.mineBlock(difficulty);
   blockchain.addBlock(genesisBlock);
-  genesisBlock.signBlock(privateKey);
+  genesisBlock.signBlock();
 
   Block block1(1, 1, genesisBlock.getBlockHash(), std::time(nullptr),
                std::vector<Transaction>(), 10, difficulty);
   block1.addTransaction(transaction1);
   block1.mineBlock(difficulty);
   blockchain.addBlock(block1);
-  block1.signBlock(privateKey);
+  block1.signBlock();
 
   Block block2(2, 1, block1.getBlockHash(), std::time(nullptr),
                std::vector<Transaction>(), 23, difficulty);
@@ -85,7 +82,7 @@ Test(blockchain, chain_validity) {
   block2.addTransaction(transaction3);
   block2.mineBlock(difficulty);
   blockchain.addBlock(block2);
-  block2.signBlock(privateKey);
+  block2.signBlock();
   cr_assert(blockchain.isChainValid(), "Chain validity failed.");
 }
 
@@ -93,9 +90,6 @@ Test(blockchain, get_block) {
   int difficulty = 4;
   Blockchain blockchain(difficulty);
 
-  std::pair<EVP_PKEY *, EVP_PKEY *> keyPair = Block::generateEVPKeyPair();
-  EVP_PKEY *privateKey = keyPair.first;
-
   std::vector<std::byte> data1 = {std::byte{0x01}, std::byte{0x02},
                                   std::byte{0x03}};
   std::vector<std::byte> data2 = {std::byte{0x04}, std::byte{0x05},
@@ -111,14 +105,14 @@ Test(blockchain, get_block) {
                      std::vector<Transaction>(), 1, difficulty);
   genesisBlock.mineBlock(difficulty);
   blockchain.addBlock(genesisBlock);
-  genesisBlock.signBlock(privateKey);
+  genesisBlock.signBlock();
 
   Block block1(1, 1, genesisBlock.getBlockHash(), std::time(nullptr),
                std::vector<Transaction>(), 10, difficulty);
   block1.addTransaction(transaction1);
   block1.mineBlock(difficulty);
   blockchain.addBlock(block1);
-  block1.signBlock(privateKey);
+  block1.signBlock();
 
   Block block2(2, 1, block1.getBlockHash(), std::time(nullptr),
                std::vector<Transaction>(), 23, difficulty);
@@ -126,7 +120,7 @@ Test(blockchain, get_block) {
   block2.addTransaction(transaction3);
   block2.mineBlock(difficulty);
   blockchain.addBlock(block2);
-  block2.signBlock(privateKey);
+  block2.signBlock();
 
   Block zeroithBlock = blockchain.getBlock(0);
   Block firstBlock = blockchain.getBlock(1);
