@@ -83,76 +83,142 @@ void Block::addTransaction(const Transaction &transaction) {
 
 int Block::getVersion() const { return version; }
 
-bool Block::signBlock() {
-    EVP_PKEY* privateKey = EVP_PKEY_new();
-    RSA *rsa = EVP_PKEY_get1_RSA(privateKey);
-    EVP_PKEY_assign_RSA(privateKey, rsa);
-    EVP_MD_CTX *mdCtx = EVP_MD_CTX_new();
+bool Block::signBlock(EVP_PKEY *privateKey) {
+  EVP_MD_CTX *mdCtx = EVP_MD_CTX_new();
 
-    //std::cout << privateKey << std::endl;
-    //std::cout << mdCtx << std::endl;
-
-    if (EVP_DigestSignInit(mdCtx, nullptr, EVP_sha256(), nullptr,
-                           privateKey) <= 0) {
-        std::cerr << "Error initializing message digest context" << std::endl;
-        return false;
-    }
-
-    std::vector<std::byte> hash = calculateBlockHash();
-
-    if (EVP_DigestSignUpdate(mdCtx,
-                             reinterpret_cast<const unsigned char *>(hash.data()),
-                             hash.size()) <= 0) {
-        std::cerr << "Error signing the hash" << std::endl;
-        return false;
-    }
-
-    size_t lenSignature;
-    if (EVP_DigestSignFinal(mdCtx, nullptr, &lenSignature) <= 0) {
-        std::cerr << "Error allocating memory for the signature" << std::endl;
-        return false;
-    }
-    blockSignature.resize(lenSignature);
-
-    if (EVP_DigestSignFinal(
-            mdCtx, reinterpret_cast<unsigned char *>(blockSignature.data()),
-            &lenSignature) <= 0) {
-        std::cerr << "Error storing the signature" << std::endl;
-        return false;
-    }
-
+  if (EVP_DigestSignInit(mdCtx, nullptr, EVP_sha256(), nullptr, privateKey) <=
+      0) {
+    std::cerr << "Error initializing message digest context" << std::endl;
     EVP_MD_CTX_free(mdCtx);
-    EVP_PKEY_free(privateKey);
-    return true;
+    return false;
+  }
+
+  std::vector<std::byte> hash = calculateBlockHash();
+
+  if (EVP_DigestSignUpdate(mdCtx,
+                           reinterpret_cast<const unsigned char *>(hash.data()),
+                           hash.size()) <= 0) {
+    std::cerr << "Error signing the hash" << std::endl;
+    EVP_MD_CTX_free(mdCtx);
+    return false;
+  }
+
+  size_t lenSignature;
+  if (EVP_DigestSignFinal(mdCtx, nullptr, &lenSignature) <= 0) {
+    std::cerr << "Error allocating memory for the signature" << std::endl;
+    EVP_MD_CTX_free(mdCtx);
+    return false;
+  }
+
+  blockSignature.resize(lenSignature);
+
+  if (EVP_DigestSignFinal(
+          mdCtx, reinterpret_cast<unsigned char *>(blockSignature.data()),
+          &lenSignature) <= 0) {
+    std::cerr << "Error storing the signature" << std::endl;
+    EVP_MD_CTX_free(mdCtx);
+    return false;
+  }
+
+  EVP_MD_CTX_free(mdCtx);
+  return true;
 }
 
-bool Block::verifyBlockSignature() const {
-    EVP_PKEY* publicKey  = EVP_PKEY_new();
-    RSA *rsa = EVP_PKEY_get1_RSA(publicKey);
-    EVP_PKEY_assign_RSA(publicKey, rsa);
-    EVP_MD_CTX *mdCtx = EVP_MD_CTX_new();
+bool Block::verifyBlockSignature(EVP_PKEY *publicKey) const {
+  EVP_MD_CTX *mdCtx = EVP_MD_CTX_new();
 
-    //std::cout << publicKey << std::endl;
-    //std::cout << mdCtx << std::endl;
-
-    if (EVP_DigestVerifyInit(mdCtx, nullptr, EVP_sha256(), nullptr,
-                             publicKey) <= 0) {
-        std::cerr << "Error verifying init message digest context" << std::endl;
-        return false;
-    }
-
-    std::vector<std::byte> hash = calculateBlockHash();
-
-    if (EVP_DigestVerify(
-            mdCtx, reinterpret_cast<const unsigned char *>(blockSignature.data()),
-            blockSignature.size(),
-            reinterpret_cast<const unsigned char *>(hash.data()),
-            hash.size()) <= 0) {
-        std::cerr << "Error verifying message" << std::endl;
-        return false;
-    }
-
+  if (EVP_DigestVerifyInit(mdCtx, nullptr, EVP_sha256(), nullptr, publicKey) <=
+      0) {
+    std::cerr << "Error verifying init message digest context" << std::endl;
     EVP_MD_CTX_free(mdCtx);
-    EVP_PKEY_free(publicKey);
-    return true;
+    return false;
+  }
+
+  std::vector<std::byte> hash = calculateBlockHash();
+
+  if (EVP_DigestVerify(
+          mdCtx, reinterpret_cast<const unsigned char *>(blockSignature.data()),
+          blockSignature.size(),
+          reinterpret_cast<const unsigned char *>(hash.data()),
+          hash.size()) <= 0) {
+    std::cerr << "Error verifying message" << std::endl;
+    EVP_MD_CTX_free(mdCtx);
+    return false;
+  }
+
+  EVP_MD_CTX_free(mdCtx);
+  return true;
+}
+
+std::pair<EVP_PKEY *, EVP_PKEY *> Block::generateEVPKeyPair() {
+  EVP_PKEY_CTX *ctx;
+  EVP_PKEY *pkey = nullptr;
+  EVP_PKEY *pubkey = nullptr;
+
+  // create a new context for key generation
+  if (!(ctx = EVP_PKEY_CTX_new_id(EVP_PKEY_RSA, nullptr))) {
+    std::cerr << "Error creating EVP_PKEY_CTX" << std::endl;
+    return std::make_pair(nullptr, nullptr);
+  }
+
+  // initialize the context for key generation
+  if (EVP_PKEY_keygen_init(ctx) <= 0) {
+    std::cerr << "Error initializing EVP_PKEY_CTX for key generation"
+              << std::endl;
+    EVP_PKEY_CTX_free(ctx);
+    return std::make_pair(nullptr, nullptr);
+  }
+
+  // Set RSA key length (2048 bits)
+  if (EVP_PKEY_CTX_set_rsa_keygen_bits(ctx, 2048) <= 0) {
+    std::cerr << "Error setting RSA key length" << std::endl;
+    EVP_PKEY_CTX_free(ctx);
+    return std::make_pair(nullptr, nullptr);
+  }
+
+  // generate the key pair
+  if (EVP_PKEY_keygen(ctx, &pkey) <= 0) {
+    std::cerr << "Error generating EVP private key" << std::endl;
+    EVP_PKEY_CTX_free(ctx);
+    return std::make_pair(nullptr, nullptr);
+  }
+
+  // Extract public key from private key
+  pubkey = EVP_PKEY_new();
+  if (!pubkey) {
+    std::cerr << "Error creating EVP public key" << std::endl;
+    EVP_PKEY_free(pkey);
+    EVP_PKEY_CTX_free(ctx);
+    return std::make_pair(nullptr, nullptr);
+  }
+
+  // Serialize private key to create public key
+  BIO *bio = BIO_new(BIO_s_mem());
+  if (!bio) {
+    std::cerr << "Error creating BIO" << std::endl;
+    EVP_PKEY_free(pkey);
+    return std::make_pair(nullptr, nullptr);
+  }
+
+  if (PEM_write_bio_PUBKEY(bio, pkey) != 1) {
+    std::cerr << "Error writing public key data to BIO" << std::endl;
+    BIO_free(bio);
+    EVP_PKEY_free(pkey);
+    return std::make_pair(nullptr, nullptr);
+  }
+
+  // Read public key from BIO
+  pubkey = PEM_read_bio_PUBKEY(bio, nullptr, nullptr, nullptr);
+  if (!pubkey) {
+    std::cerr << "Error creating EVP public key from BIO" << std::endl;
+    BIO_free(bio);
+    EVP_PKEY_free(pkey);
+    return std::make_pair(nullptr, nullptr);
+  }
+
+  BIO_free(bio);
+
+  EVP_PKEY_CTX_free(ctx);
+
+  return std::make_pair(pkey, pubkey);
 }
