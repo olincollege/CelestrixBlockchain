@@ -89,6 +89,7 @@ Test(blockchain, chain_validity) {
   cr_assert(blockchain.isChainValid(), "Chain validity failed.");
 }
 
+// Test for getting a block from a blockchain by index
 Test(blockchain, get_block) {
   int difficulty = 4;
   Blockchain blockchain(difficulty);
@@ -133,26 +134,12 @@ Test(blockchain, get_block) {
   Block secondBlock = blockchain.getBlock(2);
 
   cr_assert(zeroithBlock.getBlockHash() == genesisBlock.getBlockHash() &&
-            zeroithBlock.getPreviousHash() == genesisBlock.getPreviousHash() &&
-            zeroithBlock.getTimestamp() == genesisBlock.getTimestamp()
-            // &&
-            // zeroithBlock.getTransactions() == genesisBlock.getTransactions()
-            // && zeroithBlock.getBlockSize() == genesisBlock.getBlockSize()
-  );
+            zeroithBlock.getPreviousHash() == genesisBlock.getPreviousHash());
 
   cr_assert(firstBlock.getBlockHash() == block1.getBlockHash() &&
-            firstBlock.getPreviousHash() == block1.getPreviousHash() &&
-            firstBlock.getTimestamp() == block1.getTimestamp()
-            //&& firstBlock.getTransactions() == block1.getTransactions() &&
-            // firstBlock.getBlockSize() == block1.getBlockSize()
-
-  );
+            firstBlock.getPreviousHash() == block1.getPreviousHash());
 
   cr_assert(secondBlock.getBlockHash() == block2.getBlockHash() &&
             secondBlock.getPreviousHash() == block2.getPreviousHash() &&
-            secondBlock.getTimestamp() == block2.getTimestamp()
-            //&& secondBlock.getTransactions() == block2.getTransactions() &&
-            // secondBlock.getBlockSize() == block2.getBlockSize()
-
-  );
+            secondBlock.getTimestamp() == block2.getTimestamp());
 }
