@@ -44,3 +44,13 @@ add_test(
     NAME test_block
     COMMAND test_block ${CRITERION_FLAGS}
 _)
+
+add_executable(test_sha256 test_sha256.cpp)
+target_link_libraries(test_sha256
+    PRIVATE Blockchain
+    PUBLIC ${CRITERION}
+)
+add_test(
+    NAME test_sha256
+    COMMAND test_sha256 ${CRITERION_FLAGS}
+_)

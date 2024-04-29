@@ -2,7 +2,6 @@
 #define CELESTRIXBLOCKCHAIN_BLOCK_H
 
 #include "Transaction.h"
-#include <cstdint>
 #include <ctime>
 #include <iostream>
 #include <openssl/evp.h>
@@ -11,7 +10,6 @@
 #include <sstream>
 #include <string>
 #include <utility>
-#include <vector>
 
 /**
  * @brief Class representing a block in the blockchain.

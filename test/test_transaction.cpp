@@ -34,7 +34,7 @@ Test(transaction, no_data) {
 }
 
 // Test with data with one entry
-Test(transaction, OneData) {
+Test(transaction, one_data) {
   std::vector<std::byte> oneData({std::byte{0x01}});
   Transaction oneTransaction(1, oneData);
   cr_assert_eq(oneTransaction.getLength(), 1);

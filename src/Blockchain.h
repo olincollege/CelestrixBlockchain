@@ -2,7 +2,6 @@
 #define CELESTRIXBLOCKCHAIN_BLOCKCHAIN_H
 
 #include "Block.h"
-#include <iostream>
 
 /**
  * @brief Class representing a blockchain.

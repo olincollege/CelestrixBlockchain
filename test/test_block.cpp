@@ -1,7 +1,8 @@
 #include "../src/Block.h"
 #include <criterion/criterion.h>
 
-Test(BlockTest, get_block_hash) {
+// Test getting block hash from a block
+Test(block, get_block_hash) {
   std::vector<std::byte> previousHash(
       {std::byte{0x11}, std::byte{0x22}, std::byte{0x33}});
   std::time_t timestamp = std::time(nullptr);
@@ -25,6 +26,7 @@ Test(BlockTest, get_block_hash) {
             "Block hash doesn't match expected hash");
 }
 
+// Test for mining a block
 Test(block, mine_block) {
   std::vector<std::byte> previousHash(
       {std::byte{0x11}, std::byte{0x22}, std::byte{0x33}});
@@ -54,6 +56,7 @@ Test(block, mine_block) {
   cr_assert(minedBlockHash.size() == 32, "Invalid mined block hash size");
 }
 
+// Test for adding transactions to a block
 Test(block, add_transaction) {
   std::vector<std::byte> previousHash(
       {std::byte{0x11}, std::byte{0x22}, std::byte{0x33}});
@@ -83,6 +86,7 @@ Test(block, add_transaction) {
                "Transaction data mismatch.");
 }
 
+// Test for getting a previous blocks hash from a block
 Test(block, get_previous_hash) {
   std::vector<std::byte> previousHash(
       {std::byte{0x11}, std::byte{0x22}, std::byte{0x33}});
@@ -100,6 +104,7 @@ Test(block, get_previous_hash) {
   cr_assert(block.getPreviousHash() == previousHash, "Previous hash mismatch.");
 }
 
+// Test for getting nonce value from a block
 Test(block, get_nonce) {
   std::vector<std::byte> previousHash(
       {std::byte{0x11}, std::byte{0x22}, std::byte{0x33}});
@@ -123,6 +128,7 @@ Test(block, get_nonce) {
   cr_assert_eq(block.getNonce(), nonce, "Nonce mismatch.");
 }
 
+// Test for getting difficulty from a block
 Test(block, get_difficulty) {
   std::vector<std::byte> previousHash(
       {std::byte{0x11}, std::byte{0x22}, std::byte{0x33}});
