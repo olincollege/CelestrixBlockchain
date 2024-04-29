@@ -151,3 +151,68 @@ Test(block, get_difficulty) {
 
   cr_assert(block.getDifficulty() == difficultyTarget, "Difficulty mismatch");
 }
+
+// Test for getting the index of a block
+Test(block, get_index) {
+  std::vector<std::byte> previousHash(
+      {std::byte{0x11}, std::byte{0x22}, std::byte{0x33}});
+  std::time_t timestamp = std::time(nullptr);
+  std::vector<Transaction> transactions;
+
+  int index = 123;
+  int version = 1;
+  int nonce = 0;
+  int difficultyTarget = 5;
+
+  Block block(index, version, previousHash, timestamp, transactions, nonce,
+              difficultyTarget);
+
+  cr_assert_eq(block.getIndex(), index, "Index mismatch.");
+}
+
+// Test for getting the version of a block
+Test(block, get_version) {
+  std::vector<std::byte> previousHash(
+      {std::byte{0x11}, std::byte{0x22}, std::byte{0x33}});
+  std::time_t timestamp = std::time(nullptr);
+  std::vector<Transaction> transactions;
+
+  int index = 0;
+  int version = 5;
+  int nonce = 0;
+  int difficultyTarget = 5;
+
+  Block block(index, version, previousHash, timestamp, transactions, nonce,
+              difficultyTarget);
+
+  cr_assert_eq(block.getVersion(), version, "Version mismatch.");
+}
+
+// Test block signing and verification
+Test(block, sign_and_verify_block) {
+  auto keyPair = Block::generateEVPKeyPair();
+  EVP_PKEY *privateKey = keyPair.first;
+  EVP_PKEY *publicKey = keyPair.second;
+
+  std::vector<std::byte> previousHash(
+      {std::byte{0x11}, std::byte{0x22}, std::byte{0x33}});
+  std::time_t timestamp = std::time(nullptr);
+  std::vector<Transaction> transactions;
+
+  int index = 0;
+  int version = 1;
+  int nonce = 0;
+  int difficultyTarget = 5;
+
+  Block block(index, version, previousHash, timestamp, transactions, nonce,
+              difficultyTarget);
+
+  bool signatureResult = block.signBlock(privateKey);
+  cr_assert(signatureResult, "Failed to sign the block.");
+
+  bool verificationResult = block.verifyBlockSignature(publicKey);
+  cr_assert(verificationResult, "Failed to verify the block signature.");
+
+  EVP_PKEY_free(privateKey);
+  EVP_PKEY_free(publicKey);
+}

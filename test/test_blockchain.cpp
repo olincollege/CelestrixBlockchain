@@ -1,5 +1,6 @@
 #include "../src/Blockchain.h"
 #include <criterion/criterion.h>
+#include <iomanip>
 
 // Test basic block adding and getting from blockchain
 Test(blockchain, add_block) {
@@ -142,4 +143,40 @@ Test(blockchain, get_block) {
   cr_assert(secondBlock.getBlockHash() == block2.getBlockHash() &&
             secondBlock.getPreviousHash() == block2.getPreviousHash() &&
             secondBlock.getTimestamp() == block2.getTimestamp());
+}
+
+// Test blockchain validity checking with invalid block
+Test(blockchain, chain_invalid_block) {
+  int difficulty = 4;
+  Blockchain blockchain(difficulty);
+
+  std::pair<EVP_PKEY *, EVP_PKEY *> keyPair = Block::generateEVPKeyPair();
+  EVP_PKEY *privateKey = keyPair.first;
+
+  std::vector<std::byte> data1 = {std::byte{0x01}, std::byte{0x02},
+                                  std::byte{0x03}};
+  std::vector<std::byte> data2 = {std::byte{0x04}, std::byte{0x05},
+                                  std::byte{0x06}};
+  std::vector<std::byte> data3 = {std::byte{0x10}, std::byte{0x11},
+                                  std::byte{0x12}};
+
+  Transaction transaction1(1, data1);
+  Transaction transaction2(1, data2);
+  Transaction transaction3(1, data3);
+
+  Block genesisBlock(0, 1, std::vector<std::byte>(), std::time(nullptr),
+                     std::vector<Transaction>(), 1, difficulty);
+  genesisBlock.mineBlock(difficulty);
+  blockchain.addBlock(genesisBlock);
+  genesisBlock.signBlock(privateKey);
+
+  Block block1(1, 1, genesisBlock.getBlockHash(), std::time(nullptr),
+               std::vector<Transaction>(), 10, difficulty);
+  block1.addTransaction(transaction1);
+  block1.mineBlock(difficulty);
+  blockchain.addBlock(block1);
+  block1.signBlock(privateKey);
+
+  cr_assert(blockchain.isChainValid(),
+            "Chain validity check failed for valid chain.");
 }
