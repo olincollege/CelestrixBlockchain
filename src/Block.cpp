@@ -217,7 +217,6 @@ std::pair<EVP_PKEY *, EVP_PKEY *> Block::generateEVPKeyPair() {
   }
 
   BIO_free(bio);
-
   EVP_PKEY_CTX_free(ctx);
 
   return std::make_pair(pkey, pubkey);

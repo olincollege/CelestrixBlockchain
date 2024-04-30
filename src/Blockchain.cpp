@@ -4,7 +4,11 @@ Blockchain::Blockchain(int difficulty) : difficulty(difficulty) {}
 
 void Blockchain::addBlock(const Block &block) {
   int newIndex = chain.empty() ? 0 : chain.back().getIndex() + 1;
-  Block newBlock(newIndex, block.getVersion(), block.getPreviousHash(),
+  std::vector<std::byte> previousHash;
+  if (!chain.empty()) {
+    previousHash = chain.back().getBlockHash();
+  }
+  Block newBlock(newIndex, block.getVersion(), previousHash,
                  Block::getTimestamp(), block.getTransactions(),
                  block.getNonce(), block.getDifficulty());
   newBlock.mineBlock(difficulty);

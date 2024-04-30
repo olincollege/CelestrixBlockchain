@@ -20,6 +20,7 @@ Test(block, get_block_hash) {
 
   block.mineBlock(difficultyTarget);
 
+  expectedHash = block.calculateBlockHash();
   std::vector<std::byte> actualHash = block.getBlockHash();
 
   cr_assert(expectedHash == actualHash,
