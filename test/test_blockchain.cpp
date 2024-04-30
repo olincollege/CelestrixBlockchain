@@ -25,20 +25,20 @@ Test(blockchain, add_block) {
               difficultyTarget);
   block.addTransaction(transaction1);
   block.addTransaction(transaction2);
-
+  block.mineBlock(difficultyTarget);
   blockchain.addBlock(block);
 
-  Block lastBlock = blockchain.getBlock(block.getIndex());
+  Block testBlock = blockchain.getBlock(block.getIndex());
 
-  cr_assert(block.getPreviousHash() == lastBlock.getPreviousHash() &&
-                block.getTimestamp() == lastBlock.getTimestamp() &&
+  cr_assert(block.getPreviousHash() == testBlock.getPreviousHash() &&
+                block.getTimestamp() == testBlock.getTimestamp() &&
                 block.getTransactions().size() ==
-                    lastBlock.getTransactions().size(),
+                    testBlock.getTransactions().size(),
             "Block not added correctly to the chain");
 
   for (size_t i = 0; i < block.getTransactions().size(); ++i) {
     Transaction expectedTransaction = block.getTransactions()[i];
-    Transaction actualTransaction = lastBlock.getTransactions()[i];
+    Transaction actualTransaction = testBlock.getTransactions()[i];
 
     cr_assert(expectedTransaction.getType() == actualTransaction.getType() &&
                   expectedTransaction.getLength() ==
@@ -112,23 +112,23 @@ Test(blockchain, get_block) {
   Block genesisBlock(0, 1, std::vector<std::byte>(), std::time(nullptr),
                      std::vector<Transaction>(), 1, difficulty);
   genesisBlock.mineBlock(difficulty);
-  blockchain.addBlock(genesisBlock);
   genesisBlock.signBlock(privateKey);
+  blockchain.addBlock(genesisBlock);
 
   Block block1(1, 1, genesisBlock.getBlockHash(), std::time(nullptr),
                std::vector<Transaction>(), 10, difficulty);
   block1.addTransaction(transaction1);
   block1.mineBlock(difficulty);
-  blockchain.addBlock(block1);
   block1.signBlock(privateKey);
+  blockchain.addBlock(block1);
 
   Block block2(2, 1, block1.getBlockHash(), std::time(nullptr),
                std::vector<Transaction>(), 23, difficulty);
   block2.addTransaction(transaction2);
   block2.addTransaction(transaction3);
   block2.mineBlock(difficulty);
-  blockchain.addBlock(block2);
   block2.signBlock(privateKey);
+  blockchain.addBlock(block2);
 
   Block zeroithBlock = blockchain.getBlock(0);
   Block firstBlock = blockchain.getBlock(1);
@@ -167,15 +167,15 @@ Test(blockchain, chain_invalid_block) {
   Block genesisBlock(0, 1, std::vector<std::byte>(), std::time(nullptr),
                      std::vector<Transaction>(), 1, difficulty);
   genesisBlock.mineBlock(difficulty);
-  blockchain.addBlock(genesisBlock);
   genesisBlock.signBlock(privateKey);
+  blockchain.addBlock(genesisBlock);
 
   Block block1(1, 1, genesisBlock.getBlockHash(), std::time(nullptr),
                std::vector<Transaction>(), 10, difficulty);
   block1.addTransaction(transaction1);
   block1.mineBlock(difficulty);
-  blockchain.addBlock(block1);
   block1.signBlock(privateKey);
+  blockchain.addBlock(block1);
 
   cr_assert(blockchain.isChainValid(),
             "Chain validity check failed for valid chain.");
