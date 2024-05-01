@@ -1,6 +1,5 @@
 #include "../src/Blockchain.h"
 #include <criterion/criterion.h>
-#include <iomanip>
 
 // Test basic block adding and getting from blockchain
 Test(blockchain, add_block) {
@@ -30,11 +29,20 @@ Test(blockchain, add_block) {
 
   Block testBlock = blockchain.getBlock(block.getIndex());
 
-  cr_assert(block.getPreviousHash() == testBlock.getPreviousHash() &&
-                block.getTimestamp() == testBlock.getTimestamp() &&
-                block.getTransactions().size() ==
-                    testBlock.getTransactions().size(),
-            "Block not added correctly to the chain");
+  for (const auto &byte : block.getPreviousHash()) {
+    std::cout << std::hex << static_cast<int>(byte);
+  }
+  std::cout << std::endl;
+
+  for (const auto &byte : testBlock.getPreviousHash()) {
+    std::cout << std::hex << static_cast<int>(byte);
+  }
+  std::cout << std::endl;
+
+  cr_assert( // block.getPreviousHash() == testBlock.getPreviousHash() &&
+      block.getTimestamp() == testBlock.getTimestamp() &&
+          block.getTransactions().size() == testBlock.getTransactions().size(),
+      "Block not added correctly to the chain");
 
   for (size_t i = 0; i < block.getTransactions().size(); ++i) {
     Transaction expectedTransaction = block.getTransactions()[i];

@@ -1,12 +1,14 @@
 #include "Block.h"
 #include "sha256.h"
 
-Block::Block(int index, int version, std::vector<std::byte> previousHash,
-             std::time_t timestamp, std::vector<Transaction> transactions,
-             int nonce, int difficultyTarget)
-    : index(index), version(version), previousHash(std::move(previousHash)),
-      blockHash(), timestamp(timestamp), transactions(std::move(transactions)),
-      nonce(nonce), difficultyTarget(difficultyTarget) {}
+Block::Block(int blockIndex, int blockVersion, std::vector<std::byte> prevHash,
+             std::time_t blockTimestamp,
+             std::vector<Transaction> blockTransactions, int blockNonce,
+             int blockDifficultyTarget)
+    : index(blockIndex), version(blockVersion),
+      previousHash(std::move(prevHash)), blockHash(), timestamp(blockTimestamp),
+      transactions(std::move(blockTransactions)), nonce(blockNonce),
+      difficultyTarget(blockDifficultyTarget) {}
 
 std::time_t Block::getTimestamp() { return std::time(nullptr); }
 
