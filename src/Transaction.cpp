@@ -1,8 +1,9 @@
 #include "Transaction.h"
 
-Transaction::Transaction(int type, const std::vector<std::byte> &data)
-    : type(type), data(data) {
-  length = static_cast<int>(data.size());
+Transaction::Transaction(int transactionType,
+                         const std::vector<std::byte> &transactionData)
+    : type(transactionType), data(transactionData) {
+  length = static_cast<int>(transactionData.size());
 }
 
 int Transaction::getType() const { return type; }

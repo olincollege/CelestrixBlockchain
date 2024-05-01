@@ -1,6 +1,6 @@
 #include "Blockchain.h"
 
-Blockchain::Blockchain(int difficulty) : difficulty(difficulty) {}
+Blockchain::Blockchain(int mineDifficulty) : difficulty(mineDifficulty) {}
 
 void Blockchain::addBlock(const Block &block) {
   int newIndex = chain.empty() ? 0 : chain.back().getIndex() + 1;
