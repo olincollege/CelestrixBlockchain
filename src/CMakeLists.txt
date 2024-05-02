@@ -11,6 +11,8 @@ add_library(Blockchain
 # External libraries
 find_package(OpenSSL REQUIRED)
 
+target_compile_options(Blockchain PRIVATE "-Wno-deprecated-declarations")
+
 target_link_libraries(Blockchain PRIVATE OpenSSL::SSL OpenSSL::Crypto)
 
 target_link_libraries(main PRIVATE Blockchain OpenSSL::SSL OpenSSL::Crypto)
