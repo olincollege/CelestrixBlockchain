@@ -5,8 +5,7 @@
 Test(blockchain, add_block) {
   Blockchain blockchain(3);
 
-  std::vector<std::byte> previousHash(
-      {std::byte{0x11}, std::byte{0x22}, std::byte{0x33}});
+  std::vector<std::byte> previousHash;
   std::time_t timestamp = std::time(nullptr);
   std::vector<Transaction> transactions;
 
@@ -20,29 +19,27 @@ Test(blockchain, add_block) {
   Transaction transaction1(1, data);
   Transaction transaction2(1, data);
 
-  Block block(index, version, previousHash, timestamp, transactions, nonce,
+  Block genesisBlock(index, version, previousHash, timestamp, transactions,
+                     nonce, difficultyTarget);
+  Block block(genesisBlock.getIndex() + 1, version + 1,
+              genesisBlock.getBlockHash(), timestamp, transactions, nonce + 1,
               difficultyTarget);
+
   block.addTransaction(transaction1);
   block.addTransaction(transaction2);
   block.mineBlock(difficultyTarget);
+  genesisBlock.mineBlock(difficultyTarget);
+  blockchain.addBlock(genesisBlock);
   blockchain.addBlock(block);
 
   Block testBlock = blockchain.getBlock(block.getIndex());
 
-  for (const auto &byte : block.getPreviousHash()) {
-    std::cout << std::hex << static_cast<int>(byte);
-  }
-  std::cout << std::endl;
-
-  for (const auto &byte : testBlock.getPreviousHash()) {
-    std::cout << std::hex << static_cast<int>(byte);
-  }
-  std::cout << std::endl;
-
-  cr_assert( // block.getPreviousHash() == testBlock.getPreviousHash() &&
-      block.getTimestamp() == testBlock.getTimestamp() &&
-          block.getTransactions().size() == testBlock.getTransactions().size(),
-      "Block not added correctly to the chain");
+  cr_assert(blockchain.getBlock(block.getIndex()).getPreviousHash() ==
+                    testBlock.getPreviousHash() &&
+                block.getTimestamp() == testBlock.getTimestamp() &&
+                block.getTransactions().size() ==
+                    testBlock.getTransactions().size(),
+            "Block not added correctly to the chain");
 
   for (size_t i = 0; i < block.getTransactions().size(); ++i) {
     Transaction expectedTransaction = block.getTransactions()[i];
@@ -142,14 +139,20 @@ Test(blockchain, get_block) {
   Block firstBlock = blockchain.getBlock(1);
   Block secondBlock = blockchain.getBlock(2);
 
-  cr_assert(zeroithBlock.getBlockHash() == genesisBlock.getBlockHash() &&
-            zeroithBlock.getPreviousHash() == genesisBlock.getPreviousHash());
+  cr_assert(zeroithBlock.getBlockHash() ==
+                blockchain.getBlock(genesisBlock.getIndex()).getBlockHash() &&
+            zeroithBlock.getPreviousHash() ==
+                blockchain.getBlock(genesisBlock.getIndex()).getPreviousHash());
 
-  cr_assert(firstBlock.getBlockHash() == block1.getBlockHash() &&
-            firstBlock.getPreviousHash() == block1.getPreviousHash());
+  cr_assert(firstBlock.getBlockHash() ==
+                blockchain.getBlock(block1.getIndex()).getBlockHash() &&
+            firstBlock.getPreviousHash() ==
+                blockchain.getBlock(block1.getIndex()).getPreviousHash());
 
-  cr_assert(secondBlock.getBlockHash() == block2.getBlockHash() &&
-            secondBlock.getPreviousHash() == block2.getPreviousHash() &&
+  cr_assert(secondBlock.getBlockHash() ==
+                blockchain.getBlock(block2.getIndex()).getBlockHash() &&
+            secondBlock.getPreviousHash() ==
+                blockchain.getBlock(block2.getIndex()).getPreviousHash() &&
             secondBlock.getTimestamp() == block2.getTimestamp());
 }
 
