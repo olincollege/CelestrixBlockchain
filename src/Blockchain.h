@@ -10,7 +10,6 @@ class Blockchain {
 private:
   std::vector<Block> chain;
   int difficulty;
-  mutable std::vector<Transaction> pendingTransactions;
 
 public:
   /**

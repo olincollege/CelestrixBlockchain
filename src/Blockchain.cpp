@@ -3,11 +3,16 @@
 Blockchain::Blockchain(int mineDifficulty) : difficulty(mineDifficulty) {}
 
 void Blockchain::addBlock(const Block &block) {
+  // calculate the index for adding the new block
   int newIndex = chain.empty() ? 0 : chain.back().getIndex() + 1;
+
+  // get the previous block's hash
   std::vector<std::byte> previousHash;
   if (!chain.empty()) {
     previousHash = chain.back().getBlockHash();
   }
+
+  // initialize a new block, mine it, and then add it to the blockchain
   Block newBlock(newIndex, block.getVersion(), previousHash,
                  Block::getTimestamp(), block.getTransactions(),
                  block.getNonce(), block.getDifficulty());
@@ -24,18 +29,24 @@ Block Blockchain::getBlock(int index) const {
 }
 
 bool Blockchain::isChainValid() const {
+  // iterate through all blocks in the chain
   for (size_t i = 1; i < chain.size(); ++i) {
     const Block &currentBlock = chain[i];
     const Block &previousBlock = chain[i - 1];
 
+    // check whether the current block's hash is equal to its calculated block
+    // hash
     if (currentBlock.getBlockHash() != currentBlock.calculateBlockHash()) {
       return false;
     }
 
+    // check whether the previous hash stored in the current block is equal to
+    // the previous block's hash
     if (currentBlock.getPreviousHash() != previousBlock.getBlockHash()) {
       return false;
     }
   }
+
   return true;
 }
 

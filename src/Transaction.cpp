@@ -18,7 +18,7 @@ std::vector<std::byte> Transaction::encodeData() const {
   encoded.push_back(static_cast<std::byte>(type));
   // Encode length
   encoded.push_back(static_cast<std::byte>(length));
-  // Encode data
+  // Encode data/value
   encoded.insert(encoded.end(), data.begin(), data.end());
   return encoded;
 }

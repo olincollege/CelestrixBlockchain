@@ -15,11 +15,8 @@ Test(block, get_block_hash) {
 
   Block block(index, version, previousHash, timestamp, transactions, nonce,
               difficultyTarget);
-
   std::vector<std::byte> expectedHash = block.calculateBlockHash();
-
   block.mineBlock(difficultyTarget);
-
   expectedHash = block.calculateBlockHash();
   std::vector<std::byte> actualHash = block.getBlockHash();
 
@@ -33,7 +30,6 @@ Test(block, mine_block) {
       {std::byte{0x11}, std::byte{0x22}, std::byte{0x33}});
   std::time_t timestamp = std::time(nullptr);
   std::vector<Transaction> transactions;
-
   std::vector<std::byte> data(
       {std::byte{0x01}, std::byte{0x02}, std::byte{0x03}});
   Transaction transaction(1, data);
@@ -45,15 +41,11 @@ Test(block, mine_block) {
 
   Block block(index, version, previousHash, timestamp, transactions, nonce,
               difficultyTarget);
-
   block.addTransaction(transaction);
-
   block.mineBlock(difficultyTarget);
-
   std::vector<std::byte> minedBlockHash = block.getBlockHash();
 
   cr_assert(!minedBlockHash.empty(), "Mined block hash is empty");
-
   cr_assert(minedBlockHash.size() == 32, "Invalid mined block hash size");
 }
 
@@ -71,11 +63,9 @@ Test(block, add_transaction) {
 
   Block block(index, version, previousHash, timestamp, transactions, nonce,
               difficultyTarget);
-
   std::vector<std::byte> data = {std::byte{0x01}, std::byte{0x02},
                                  std::byte{0x03}};
   Transaction transaction(1, data);
-
   block.addTransaction(transaction);
 
   std::vector<Transaction> updatedTransactions = block.getTransactions();
@@ -111,7 +101,6 @@ Test(block, get_nonce) {
       {std::byte{0x11}, std::byte{0x22}, std::byte{0x33}});
   std::time_t timestamp = std::time(nullptr);
   std::vector<Transaction> transactions;
-
   std::vector<std::byte> data(
       {std::byte{0x01}, std::byte{0x02}, std::byte{0x03}});
   Transaction transaction(1, data);
@@ -123,7 +112,6 @@ Test(block, get_nonce) {
 
   Block block(index, version, previousHash, timestamp, transactions, nonce,
               difficultyTarget);
-
   block.addTransaction(transaction);
 
   cr_assert_eq(block.getNonce(), nonce, "Nonce mismatch.");
@@ -143,11 +131,9 @@ Test(block, get_difficulty) {
 
   Block block(index, version, previousHash, timestamp, transactions, nonce,
               difficultyTarget);
-
   std::vector<std::byte> data(
       {std::byte{0x01}, std::byte{0x02}, std::byte{0x03}});
   Transaction transaction(1, data);
-
   block.addTransaction(transaction);
 
   cr_assert(block.getDifficulty() == difficultyTarget, "Difficulty mismatch");
