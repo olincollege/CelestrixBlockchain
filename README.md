@@ -88,7 +88,7 @@ std::vector<std::byte> data = {std::byte{0x01}, std::byte{0x02}, std::byte{0x03}
 Transaction transaction(1, data);
 ```
 
-Once you have created the desired amount of transactions, you can initialize a new block with the following parameters. Once after it is initializeed, we need to mine the block and then sign it using a private key before adding it to the blockchain. (more on that below)
+Once you have created the desired amount of transactions, you can initialize a new block with the following parameters. Once after it is initialized, we need to mine the block and then sign it using a private key before adding it to the blockchain. (more on that below)
 
 ```cpp
 Block block(int index, int version, std::vector<std::byte> previousHash,
@@ -111,7 +111,7 @@ EVP_PKEY *privateKey = keyPair.first;
 EVP_PKEY *publicKey = keyPair.second;
 ```
 
-We can sign a block with the generated private keyt once after we have initialized a block.
+We can sign a block with the generated private key once after we have initialized a block.
 ```cpp
 block.signBlock(privateKey);
 ```

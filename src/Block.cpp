@@ -15,6 +15,7 @@ std::time_t Block::getTimestamp() { return std::time(nullptr); }
 std::vector<std::byte> Block::getBlockHash() const { return blockHash; }
 
 std::vector<std::byte> Block::calculateBlockHash() const {
+  // store all the data in a string stream
   std::stringstream ss;
   ss << index;
   ss << version;
@@ -33,6 +34,7 @@ std::vector<std::byte> Block::calculateBlockHash() const {
   ss << nonce;
   ss << difficultyTarget;
 
+  // Convert the data string stream into bytes
   std::string data = ss.str();
   std::vector<std::byte> dataBytes;
   for (char c : data) {
@@ -47,9 +49,9 @@ void Block::mineBlock(int difficulty) {
                                 static_cast<std::byte>(0x00));
   target.push_back(
       static_cast<std::byte>(static_cast<int>(0xFF) << (8 - difficulty % 8)));
-
   do {
     nonce++;
+    // recalculate block hash every time nonce is updated
     blockHash = calculateBlockHash();
   } while (!std::equal(blockHash.begin(), blockHash.begin() + difficulty / 8,
                        target.begin()));
@@ -86,6 +88,7 @@ void Block::addTransaction(const Transaction &transaction) {
 int Block::getVersion() const { return version; }
 
 bool Block::signBlock(EVP_PKEY *privateKey) {
+  // initialize a new message digest context
   EVP_MD_CTX *mdCtx = EVP_MD_CTX_new();
 
   if (EVP_DigestSignInit(mdCtx, nullptr, EVP_sha256(), nullptr, privateKey) <=
@@ -95,6 +98,7 @@ bool Block::signBlock(EVP_PKEY *privateKey) {
     return false;
   }
 
+  // calculate the hash for the data to sign
   std::vector<std::byte> hash = calculateBlockHash();
 
   if (EVP_DigestSignUpdate(mdCtx,
@@ -105,15 +109,16 @@ bool Block::signBlock(EVP_PKEY *privateKey) {
     return false;
   }
 
+  // allocate memory for signature
   size_t lenSignature;
   if (EVP_DigestSignFinal(mdCtx, nullptr, &lenSignature) <= 0) {
     std::cerr << "Error allocating memory for the signature" << std::endl;
     EVP_MD_CTX_free(mdCtx);
     return false;
   }
-
   blockSignature.resize(lenSignature);
 
+  // sign and store the signature
   if (EVP_DigestSignFinal(
           mdCtx, reinterpret_cast<unsigned char *>(blockSignature.data()),
           &lenSignature) <= 0) {
@@ -127,6 +132,7 @@ bool Block::signBlock(EVP_PKEY *privateKey) {
 }
 
 bool Block::verifyBlockSignature(EVP_PKEY *publicKey) const {
+  // initialize a new message digest context for verifying
   EVP_MD_CTX *mdCtx = EVP_MD_CTX_new();
 
   if (EVP_DigestVerifyInit(mdCtx, nullptr, EVP_sha256(), nullptr, publicKey) <=
@@ -136,6 +142,7 @@ bool Block::verifyBlockSignature(EVP_PKEY *publicKey) const {
     return false;
   }
 
+  // calculate the hash for the data to verify
   std::vector<std::byte> hash = calculateBlockHash();
 
   if (EVP_DigestVerify(

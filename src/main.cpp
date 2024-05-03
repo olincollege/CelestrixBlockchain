@@ -18,7 +18,7 @@ int main() {
             << std::endl;
 
   // Initialize blockchain with the desired difficulty for mining
-  int difficulty = 4;
+  int difficulty = 10;
   Blockchain blockchain(difficulty);
 
   // Generate EVP key pair for signature verification
