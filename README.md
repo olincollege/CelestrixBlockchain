@@ -7,7 +7,9 @@ Project - Olin College of Engineering
 A blockchain is a decentralized and distributed digital ledger that records
 transactions across multiple computers in a way that is immutable and transparent.
 Celestrix Blockchain provides a simple implementation of this technology
-in C++, demonstrating functionalities such as block creation, mining, and transaction management.
+in C++, demonstrating functionalities such as block creation, proof-of-work (mining), 
+transaction management, block signing, and verification, with support for printing and 
+verifying the blockchain's integrity.
 
 ## Dependencies
 
